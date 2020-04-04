@@ -7,7 +7,7 @@ You can find a scratchpad for drawing syntax trees for draw.io [here](https://do
 Download the file and go to https://draw.io and open or create a new diagram.  Remember where you saved this file.
 NOTE: Alternatively you can download and install the draw.io app on your local computer (https://www.diagrams.net/)
 
-####Import the Scratchpad
+#### Import the Scratchpad
 On the left-hand-side, click on the plus + sign on your Scratchpad.
 
 ![](.README_images/5cc480c7.png)
