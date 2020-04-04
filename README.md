@@ -3,7 +3,7 @@
 Source code repository for Syntax taught at Portland State University.
 
 ### Syntax Tree Scratchpad for draw.io
-You can find a scratchpad for drawing syntax trees for draw.io [here](https://docs.google.com/document/d/1kCtyvFJcMTXyjqntF85PAItWCT0LjCmx_Z5IVKr0Xh4).
+You can find a scratchpad for drawing syntax trees for draw.io [here](https://github.com/steve3p0/LING511/blob/master/Draw.IO%20Syntax%20Scratchpad.xml).
 Download the file and go to https://draw.io and open or create a new diagram.  Remember where you saved this file.
 NOTE: Alternatively you can download and install the draw.io app on your local computer (https://www.diagrams.net/)
 
