@@ -15,6 +15,7 @@ from PIL import Image
 # Add that line to the path environment variable
 # You may have to reboot for the path environment variable to take effect
 
+
 def write_to_file(tree, filename):
     if os.path.exists(f"{filename}.ps"):
         os.remove(f"{filename}.ps")
@@ -46,6 +47,7 @@ def parse_trees(sentences):
             filename = f"tree_{i}"
             write_to_file(tree, filename)
 
+
 sentences = [
                 "The animals did not think the buffalo would eat them",
                 "They were afraid the buffalo would trample them",
@@ -59,8 +61,7 @@ sentences = [
                 "He thought that other places must be more interesting"
             ]
 
-#sentences = ["He thought that other places must be more interesting"]
-
+# sentences = ["He thought that other places must be more interesting"]
 
 parse_trees(sentences)
 
