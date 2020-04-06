@@ -46,22 +46,6 @@ def parse_trees(sentences):
             filename = f"tree_{i}"
             write_to_file(tree, filename)
 
-
-# sentences = (
-#                 (
-#                     "The animals did not think the buffalo would eat them",
-#                     "They were afraid the buffalo would trample them",
-#                     "The buffalo were pursuing fresh grass",
-#                     "Those buffalo were large and lumbering",
-#                     "The herd that the animals had heard caused considerable alarm",
-#                     "One young buffalo trotted slowly behind the herd",
-#                     "He was smelling the fresh grass",
-#                     "This buffalo was wondering whether he would find any adventures",
-#                     "He was tired of the dry grassy plains",
-#                     "He thought that other places must be more interesting"
-#                 )
-#             )
-
 sentences = [
                 "The animals did not think the buffalo would eat them",
                 "They were afraid the buffalo would trample them",
