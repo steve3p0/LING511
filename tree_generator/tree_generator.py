@@ -3,6 +3,10 @@ from nltk.parse import stanford
 from nltk.draw.tree import TreeView
 from PIL import Image
 
+os.environ['STANFORD_PARSER'] = 'C:\\workspace_courses\\LING511\\tree_generator'
+os.environ['STANFORD_MODELS'] = 'C:\\workspace_courses\\LING511\\tree_generator'
+model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
+
 # Requirements:
 # This script requires Ghostscript for image conversion
 # You have to install the python package (via pip):
@@ -32,12 +36,10 @@ def write_to_file(tree, filename):
     except OSError as e:  # name the Exception `e`
         print("Failed with:", e.strerror)  # look what it says
 
+
 def parse_trees(sentences):
     # Output trees to file
-
-    os.environ['STANFORD_PARSER'] = 'C:\\workspace_courses\\LING511\\tree_generator'
-    os.environ['STANFORD_MODELS'] = 'C:\\workspace_courses\\LING511\\tree_generator'
-    parser = stanford.StanfordParser(model_path="C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz")
+    parser = stanford.StanfordParser(model_path=model_path)
     trees = parser.raw_parse_sents(sentences)
 
     i = 0
