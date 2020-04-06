@@ -15,18 +15,18 @@ from PIL import Image
 # Add that line to the path environment variable
 # You may have to reboot for the path environment variable to take effect
 
-os.environ['STANFORD_PARSER'] = 'C:\\workspace_courses\\LING511\\tree_generator'
-os.environ['STANFORD_MODELS'] = 'C:\\workspace_courses\\LING511\\tree_generator'
 model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
 
-class TreeBuilder:
+class Tree(object):
     def __init__(self, parser):
         self.parser = parser
 
     @staticmethod
     def tree_to_string(tree):
-        s = str(tree)
+        # s = str(tree)
+        # pformat(self, margin=70, indent=0, nodesep="", parens="()", quotes=False)
+        s = tree.pformat()
         return s
 
     @staticmethod
@@ -43,8 +43,6 @@ class TreeBuilder:
                 img.save(f"{filename}.png")
 
     def parse_sentence(self, sentence):
-        # fromstring
-        #:type remove_empty_top_bracketing: bool
         tree = next(self.parser.raw_parse(sentence))
         return tree
 
@@ -59,23 +57,23 @@ class TreeBuilder:
             self.write_to_file(tree, filename)
 
 
-if __name__ == '__main__':
-    # sentences = ["He thought that other places must be more interesting"]
-
-    sentences = [
-                    "The animals did not think the buffalo would eat them",
-                    "They were afraid the buffalo would trample them",
-                    "The buffalo were pursuing fresh grass",
-                    "Those buffalo were large and lumbering",
-                    "The herd that the animals had heard caused considerable alarm",
-                    "One young buffalo trotted slowly behind the herd",
-                    "He was smelling the fresh grass",
-                    "This buffalo was wondering whether he would find any adventures",
-                    "He was tired of the dry grassy plains",
-                    "He thought that other places must be more interesting"
-                ]
-
-    parser = stanford.StanfordParser(model_path=model_path)
-    tree_builder = TreeBuilder(parser)
-    tree_builder.parse_sentences(sentences)
+# if __name__ == '__main__':
+#     # sentences = ["He thought that other places must be more interesting"]
+#
+#     sentences = [
+#                     "The animals did not think the buffalo would eat them",
+#                     "They were afraid the buffalo would trample them",
+#                     "The buffalo were pursuing fresh grass",
+#                     "Those buffalo were large and lumbering",
+#                     "The herd that the animals had heard caused considerable alarm",
+#                     "One young buffalo trotted slowly behind the herd",
+#                     "He was smelling the fresh grass",
+#                     "This buffalo was wondering whether he would find any adventures",
+#                     "He was tired of the dry grassy plains",
+#                     "He thought that other places must be more interesting"
+#                 ]
+#
+#     parser = stanford.StanfordParser(model_path=model_path)
+#     tree_builder = TreeBuilder(parser)
+#     tree_builder.parse_sentences(sentences)
 
