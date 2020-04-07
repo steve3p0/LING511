@@ -33,6 +33,7 @@ tag_mapping = {
     'PRP': 'N',
     # Verbs
     'VB': 'V',
+    'VBN': 'V',
     'VBD': 'V',
     'VBG': 'V',
     # Adjectives
@@ -43,13 +44,16 @@ tag_mapping = {
     # Adverbs
     'ADVP': 'AdvP',
     'RB': 'Adv',
+    'RBR': 'Adv',
     # Prepositions
     'IN': 'P',
     #'IN': 'C',  # sometimes IN is C (complement)?
 
-    # issues:
+    # Modal issues:
     # 1) IF MD IS tense, then it needs to be moved to and a transfer must occur
     #    look at #8 from 10TAD3
+    'MD': 'V',
+
     # 2) JJ : AdjP -> Adj
     # 3) Complementizer Phrases
     #     a) # empty set C: ∅
@@ -143,8 +147,8 @@ class Tree(object):
                 parent.pop(0)
 
                 # to do:
-                # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
-                tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+                tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+                #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
                 grandpa.insert(1, tense)
 
         for child in t:
@@ -259,6 +263,35 @@ class Tree(object):
         new_tree = nltk.tree.Tree.convert(ptree)
         return new_tree
 
+    def add_complement(self, t):
+        try:
+            t.label()
+        except AttributeError:
+            return
+
+        if t.label() == 'CP':
+            current = t
+
+            len(current)
+            if len(current) == 1:
+                # (C Ø)
+                empty_set_node = nltk.tree.Tree.fromstring("(C Ø)")
+                current.insert(0, empty_set_node)
+
+            # parent = current.parent()
+            #
+            # if t.right_sibling().label() == modal_labels:
+            #     grandpa = parent.parent()
+            #     parent.pop(0)
+            #
+            #     # to do:
+            #     # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+            #     tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+            #     grandpa.insert(1, tense)
+
+        for child in t:
+            self.add_complement(child)
+
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
@@ -266,6 +299,7 @@ class Tree(object):
         tree = self.convert_tree_labels(tree, tag_mapping)
         tree = self.promote_modals_to_tense(tree)
         tree = self.expand_phrase(tree)
+        self.add_complement(tree)
 
         return tree[0]
 

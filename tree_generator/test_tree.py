@@ -42,13 +42,16 @@ class TestTree(unittest.TestCase):
     def test_parse_sentence(self):
         sentence = "The dog chased the cat"
         tree_s = "(TP (NP (D The) (N dog)) (VP (V chased) (NP (D the) (N cat))))"
-        expected_tree = nltk_tree.fromstring(tree_s, remove_empty_top_bracketing=True)
+        expected_tree = nltk_tree.fromstring(tree_s)
         expected_str = inspect.cleandoc(str(expected_tree))
 
         parser = stanford.StanfordParser(model_path=model_path)
         tree = Tree(parser)
         actual_tree = tree.parse_sentence(sentence)
         actual_str = inspect.cleandoc(str(actual_tree))
+
+        print(f"Expected String: \n{expected_str}")
+        print(f"Actual String: \n{actual_str}")
 
         print(f"Expected String: \n{expected_str}")
         print(f"Actual String: \n{actual_str}")
@@ -222,13 +225,15 @@ class TestTreeIntegration(unittest.TestCase):
         parser = stanford.StanfordParser(model_path=model_path)
         tree = Tree(parser)
         actual_tree = tree.parse_sentence(sentence)
-        actual_tree_str = inspect.cleandoc(str(actual_tree))
+        actual_tree_str = inspect.cleandoc(str(actual_tree)).replace('\n', '').replace('\r', '').replace('  ', ' ')
 
         if debug:
             print("#########################################################################################")
             print(f"Test Sentence {testid}: {sentence}:")
-            print(f"Expected String: \n{expected_tree_str}\n")
-            print(f"Actual String: \n{actual_tree_str}\n")
+            # print(f"Expected String: \n{expected_tree_str}\n")
+            # print(f"Actual String: \n{actual_tree_str}\n")
+            print(f"Expected String: \n{str(expected_tree)}\n")
+            print(f"Actual String: \n{str(actual_tree)}\n")
             tree.write_to_file(expected_tree, f"tree_expected_{testid}")
             tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
@@ -293,7 +298,7 @@ class TestTreeIntegration(unittest.TestCase):
     def test_ten_trees_a_day_three_8(self):
         sentence = "This buffalo was wondering whether he would find any adventures"
         expected_parse_str = \
-            "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (P whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))"
+            "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (C whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))"
 
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 8, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -309,7 +314,7 @@ class TestTreeIntegration(unittest.TestCase):
     def test_ten_trees_a_day_three_10(self):
         sentence = "He thought that other places must be more interesting"
         expected_parse_str = \
-            "(TP (NP (N He)) (T thought) (VP (CP (P that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (RBR more) (Adj interesting)))))))"
+            "(TP (NP (N He)) (VP (V thought) (CP (P that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (AdvP (Adv more)) (AdjP (Adj interesting))))))))"
 
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 10, True)
         self.assertEqual(actual_tree, expected_tree)
