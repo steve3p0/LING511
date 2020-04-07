@@ -103,81 +103,38 @@ class Tree(object):
         label = mapping.get(tree.label(), tree.label())
         return nltk.tree.Tree(label, children)
 
-    # def traverse(self, t, np_trees):
-    #     # VBN - Verb, past participle
-    #     # VBP - Verb, non-3rd person singular present
-    #     # VBZ
-    #
-    #     try:
-    #         t.label()
-    #     except AttributeError:
-    #         return
-    #
-    #     if t.label() == "VBZ":
-    #         current = t
-    #         while current.parent() is not None:
-    #             while current.left_sibling() is not None:
-    #                 if current.left_sibling().label() == "NP":
-    #                     np_trees.append(current.left_sibling())
-    #                 current = current.left_sibling()
-    #             current = current.parent()
-    #
-    #     for child in t:
-    #         self.traverse(child, np_trees)
-
-    def traverse(self, t):
-        # VBN - Verb, past participle
-        # VBP - Verb, non-3rd person singular present
-        # VBZ
-
+    def promote_tense(self, t, modal_labels, new_label):
         try:
             t.label()
         except AttributeError:
             return
 
-        if t.label() == "VBD":
+        if t.label() in modal_labels:
             current = t
             parent = current.parent()
-            #new_parent = parent
-            #new_parent.remove(t[0])
-            #new_parent.remove('did')
-            #new_parent.remove('VBD')
             grandpa = parent.parent()
             parent.pop(0)
-
-            #grandpa.insert(1, current)
-            tense = nltk.tree.Tree.fromstring(f"(T {t[0]})")
-            tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"(T {t[0]})"))
+            tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
             grandpa.insert(1, tense)
-            #grandpa.insert(1, nltk.tree.Tree('T', [t[0]]))
-            #left_uncle = parent.left_sibiling()
-
-
-
-
-            #grandpa.insert(1,  nltk.tree.Tree('T', ['fuck']))
-            #grandpa.insert(1, nltk.tree.Tree('T', [t[0]]))
-
-            #t[0]
-
-            # while current.parent() is not None:
-            #     while current.left_sibling() is not None:
-            #         if current.left_sibling().label() == "NP":
-            #             # STOP
-            #             # np_trees.append(current.left_sibling())
-            #
-            #
-            #
-            #
-            #         current = current.left_sibling()
-            #     current = current.parent()
 
         for child in t:
-            self.traverse(child)
+            self.promote_tense(child, modal_labels, new_label)
+
+    def promote_modals_to_tense(self, t):
+        # VBN - Verb, past participle
+        # VBP - Verb, non-3rd person singular present
+        # VBZ
+        ptree = nltk.tree.ParentedTree.convert(t)
+        modal_tags = ["VBD", "MD"]
+        self.promote_tense(ptree, modal_tags, "T")
+        new_tree_str = str(ptree)
+        new_tree = nltk.tree.Tree.fromstring(new_tree_str)
+        return new_tree
 
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
-        #tree = self.convert_tree_labels(tree, tag_mapping)
+        tree = self.promote_modals_to_tense(tree)
+        tree = self.convert_tree_labels(tree, tag_mapping)
         # Get rid of of ROOT node
         return tree[0]
         #return tree

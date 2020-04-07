@@ -119,48 +119,8 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_tree_str, 1, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_traverse_old(self):
-        from nltk.tree import ParentedTree
-        #before_tree = "(S (NP (NNP)) (VP (VBZ) (NP (NNP))))"
-        before_tree = inspect.cleandoc("""
-        (S
-          (NP (DT The) (NNS animals))
-          (VP
-            (VBD did)
-            (RB not)
-            (VP
-              (VB think)
-              (SBAR
-                (S
-                  (NP (DT the) (NN buffalo))
-                  (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
-
-        tree = ParentedTree.fromstring(before_tree)
-        steve_tree = Tree()
-        new_tree = []
-        steve_tree.traverse(tree, new_tree)
-        #print(new_tree) # [ParentedTree('NP', [ParentedTree('NNP', [])])]
-        #print(f"Expected String: \n{expected_tree_str}\n")
-        print(f"New Tree: \n{new_tree}\n")
-
     def test_traverse(self):
         from nltk.tree import ParentedTree
-        #before_tree = "(S (NP (NNP)) (VP (VBZ) (NP (NNP))))"
-        # before_tree = inspect.cleandoc("""
-        # (S
-        #   (NP (DT The) (NNS animals))
-        #   (VP
-        #     (VBD did)
-        #     (RB not)
-        #     (VP
-        #       (VB eat)
-        #       (NP
-        #         (NN food)
-        #       )
-        #     )
-        #   )
-        # )""")
-
         expected_tree_str = inspect.cleandoc("""
         (S
           (NP (DT The) (NNS animals))
@@ -188,13 +148,47 @@ class TestTreeIntegration(unittest.TestCase):
                   (NP (DT the) (NN buffalo))
                   (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
 
-        tree = ParentedTree.fromstring(before_tree_str)
+        before_tree = ParentedTree.fromstring(before_tree_str)
         steve_tree = Tree()
-        steve_tree.traverse(tree)
-        new_tree_str = str(tree)
+        steve_tree.traverse(before_tree)
+        new_tree_str = str(before_tree)
         actual_tree = nltk_tree.fromstring(new_tree_str)
-        #print(new_tree) # [ParentedTree('NP', [ParentedTree('NNP', [])])]
-        #print(f"Expected String: \n{expected_tree_str}\n")
+        print(f"Actual Tree: \n{actual_tree}\n")
+
+        steve_tree.write_to_file(actual_tree, "moved_VZD_to_T")
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_promote_modals_to_tense(self):
+        expected_tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (T did)
+          (VP
+            (RB not)
+            (VP
+              (VB think)
+              (SBAR
+                (S
+                  (NP (DT the) (NN buffalo))
+                  (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
+        expected_tree = nltk_tree.fromstring(expected_tree_str)
+
+        before_tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (VP
+            (VBD did)
+            (RB not)
+            (VP
+              (VB think)
+              (SBAR
+                (S
+                  (NP (DT the) (NN buffalo))
+                  (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
+
+        before_tree = nltk_tree.fromstring(before_tree_str)
+        steve_tree = Tree()
+        actual_tree = steve_tree.promote_modals_to_tense(before_tree)
         print(f"Actual Tree: \n{actual_tree}\n")
 
         steve_tree.write_to_file(actual_tree, "moved_VZD_to_T")
