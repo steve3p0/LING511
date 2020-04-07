@@ -206,17 +206,59 @@ class Tree(object):
         for child in t:
             self.collapse_duplicate_nodes(child, label)
 
+    # def expand_phrase_nodes(self, t, preterminal_tags):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         return
+    #
+    #     if t.label() in preterminal_tags:
+    #         current = t
+    #         parent = current.parent()
+    #         phrase_label = f"{t.label()}P"
+    #         if parent.label() != phrase_label:
+    #             parent_index = current.parent_index()
+    #             new_child = nltk.tree.ParentedTree.convert(current)
+    #
+    #             new_parent = nltk.tree.ParentedTree(phrase_label, [new_child])
+    #             parent.remove(current)
+    #             parent.insert(parent_index, new_parent)
+    #
+    #             # test t back to current before continuing to traverse.
+    #             t = new_child
+    #
+    #     for child in t:
+    #         self.expand_phrase_nodes(child, preterminal_tags)
+
     def expand_phrase_nodes(self, t, preterminal_tags):
         try:
             t.label()
         except AttributeError:
             return
 
+        # NOTE: To access the left-child node    (object) of a tree node:  t[0]
+        # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
+        # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
+        # NOTE: To whoever designed nltk.tree: That's fucked
+
         if t.label() in preterminal_tags:
             current = t
             parent = current.parent()
             phrase_label = f"{t.label()}P"
             if parent.label() != phrase_label:
+                parent_index = current.parent_index()
+                new_child = nltk.tree.ParentedTree.convert(current)
+
+                new_parent = nltk.tree.ParentedTree(phrase_label, [new_child])
+                parent.remove(current)
+                parent.insert(parent_index, new_parent)
+
+                # test t back to current before continuing to traverse.
+                t = new_child
+
+            # If parent is a Phrase of the same tag type, but is not preterminal (it has more than 1 child nodes)....
+            # Replace the current node with a preterminal phrase and move the current node as it's only child
+            elif parent.label() == phrase_label and len(parent) > 1:
                 parent_index = current.parent_index()
                 new_child = nltk.tree.ParentedTree.convert(current)
 
@@ -234,6 +276,7 @@ class Tree(object):
         # Search for preterminals with child_label that are not a child of a phrase (phrase_label)
         # Insert a phrase node above the child
         preterminal_tags = ["Adv", "Adj"]
+        #preterminal_tags = ["Adj"]
 
         # Need to convert a ntlk.tree.Tree to a ParentedTree
         # in order to access parent nodes collapsing

@@ -239,7 +239,7 @@ class TestTreeIntegration(unittest.TestCase):
 
         return expected_tree, actual_tree
 
-    def test_ten_trees_a_day_three_1(self):
+    def test_ten_trees_a_day_three_01(self):
         sentence = "The animals did not think the buffalo would eat them"
         expected_parse_str = \
             "(TP (NP (D The) (N animals)) (T did) (VP (AdvP (Adv not)) (V think) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V eat) (NP (N them)))))))"
@@ -247,7 +247,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 1, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_2(self):
+    def test_ten_trees_a_day_three_02(self):
         sentence = "They were afraid the buffalo would trample them"
         expected_parse_str = \
             "(TP (NP (N They)) (VP (V were) (AdjP (Adj afraid) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V trample) (NP (N them))))))))"
@@ -255,7 +255,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 2, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_3(self):
+    def test_ten_trees_a_day_three_03(self):
         sentence = "The buffalo were pursuing fresh grass"
         expected_parse_str = \
             "(TP (NP (D The) (N buffalo)) (T were) (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass))))"
@@ -263,7 +263,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 3, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_4(self):
+    def test_ten_trees_a_day_three_04(self):
         sentence = "Those buffalo were large and lumbering"
         expected_parse_str = \
             "(TP (NP (D Those) (N buffalo)) (VP (V were) (AdjP (AdjP (Adj large)) (Conj and) (AdjP (Adj lumbering)))))"
@@ -271,7 +271,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 4, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_5(self):
+    def test_ten_trees_a_day_three_05(self):
         sentence = "The herd that the animals had heard caused considerable alarm"
         expected_parse_str = \
             "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (VBN heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))"
@@ -279,7 +279,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 5, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_6(self):
+    def test_ten_trees_a_day_three_06(self):
         sentence = "One young buffalo trotted slowly behind the herd"
         expected_parse_str = \
             "(TP (NP (D One) (AdjP (Adj young)) (N buffalo)) (VP (V trotted) (AdvP (Adv slowly)) (PP (P behind) (NP (D the) (N herd)))))"
@@ -287,7 +287,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 6, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_7(self):
+    def test_ten_trees_a_day_three_07(self):
         sentence = "He was smelling the fresh grass"
         expected_parse_str = \
             "(TP (NP (N He)) (T was) (VP (V smelling) (NP (D the) (AdjP (Adj fresh)) (N grass))))"
@@ -295,7 +295,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 7, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_8(self):
+    def test_ten_trees_a_day_three_08(self):
         sentence = "This buffalo was wondering whether he would find any adventures"
         expected_parse_str = \
             "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (C whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))"
@@ -303,7 +303,7 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 8, True)
         self.assertEqual(actual_tree, expected_tree)
 
-    def test_ten_trees_a_day_three_9(self):
+    def test_ten_trees_a_day_three_09(self):
         sentence = "He was tired of the dry grassy plains"
         expected_parse_str = \
             "(TP (NP (N He)) (VP (V was) (AdjP (Adj tired) (PP (P of) (NP (D the) (AdjP (Adj dry)) (AdjP (Adj grassy)) (N plains))))))"
