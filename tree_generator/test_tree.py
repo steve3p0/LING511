@@ -119,3 +119,66 @@ class TestTreeIntegration(unittest.TestCase):
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_tree_str, 1, True)
         self.assertEqual(actual_tree, expected_tree)
 
+    def test_traverse_old(self):
+        from nltk.tree import ParentedTree
+        #before_tree = "(S (NP (NNP)) (VP (VBZ) (NP (NNP))))"
+        before_tree = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (VP
+            (VBD did)
+            (RB not)
+            (VP
+              (VB think)
+              (SBAR
+                (S
+                  (NP (DT the) (NN buffalo))
+                  (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
+
+        tree = ParentedTree.fromstring(before_tree)
+        steve_tree = Tree()
+        new_tree = []
+        steve_tree.traverse(tree, new_tree)
+        #print(new_tree) # [ParentedTree('NP', [ParentedTree('NNP', [])])]
+        #print(f"Expected String: \n{expected_tree_str}\n")
+        print(f"New Tree: \n{new_tree}\n")
+
+    def test_traverse(self):
+        from nltk.tree import ParentedTree
+        #before_tree = "(S (NP (NNP)) (VP (VBZ) (NP (NNP))))"
+        # before_tree = inspect.cleandoc("""
+        # (S
+        #   (NP (DT The) (NNS animals))
+        #   (VP
+        #     (VBD did)
+        #     (RB not)
+        #     (VP
+        #       (VB eat)
+        #       (NP
+        #         (NN food)
+        #       )
+        #     )
+        #   )
+        # )""")
+
+        before_tree = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (VP
+            (VBD did)
+            (RB not)
+            (VP
+              (VB think)
+              (SBAR
+                (S
+                  (NP (DT the) (NN buffalo))
+                  (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
+
+        tree = ParentedTree.fromstring(before_tree)
+        steve_tree = Tree()
+        new_tree = []
+        steve_tree.traverse(tree, new_tree)
+        #print(new_tree) # [ParentedTree('NP', [ParentedTree('NNP', [])])]
+        #print(f"Expected String: \n{expected_tree_str}\n")
+        print(f"New Tree: \n{tree}\n")
+
