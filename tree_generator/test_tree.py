@@ -238,3 +238,41 @@ class TestTreeIntegration(unittest.TestCase):
         steve_tree.write_to_file(actual_tree, "collapse_duplicate_nodes")
         self.assertEqual(actual_tree, expected_tree)
 
+    def test_expand_phrase(self):
+        expected_tree_str = inspect.cleandoc("""
+        (TP
+          (NP (D The) (N animals))
+          (T did)
+          (VP
+            (AdvP 
+                (Adv not))
+            (V think)
+            (CP
+              (C ∅)
+              (TP
+                (NP (D the) (N buffalo))
+                (T would)
+                (VP (V eat) (NP (N them)))))))""")
+        expected_tree = nltk_tree.fromstring(expected_tree_str)
+
+        before_tree_str = inspect.cleandoc("""
+        (TP
+          (NP (D The) (N animals))
+          (T did)
+          (VP
+            (Adv not)
+            (V think)
+            (CP
+              (C ∅)
+              (TP
+                (NP (D the) (N buffalo))
+                (T would)
+                (VP (V eat) (NP (N them)))))))""")
+
+        before_tree = nltk_tree.fromstring(before_tree_str)
+        steve_tree = Tree()
+        actual_tree = steve_tree.expand_phrase(before_tree)
+        print(f"Actual Tree: \n{actual_tree}\n")
+
+        steve_tree.write_to_file(actual_tree, "expand_phrase_nodes")
+        self.assertEqual(actual_tree, expected_tree)
