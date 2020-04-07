@@ -271,23 +271,21 @@ class Tree(object):
 
         if t.label() == 'CP':
             current = t
-
-            len(current)
             if len(current) == 1:
-                # (C Ø)
+                # (C Ø)  <- The empty set
                 empty_set_node = nltk.tree.Tree.fromstring("(C Ø)")
                 current.insert(0, empty_set_node)
 
-            # parent = current.parent()
-            #
-            # if t.right_sibling().label() == modal_labels:
-            #     grandpa = parent.parent()
-            #     parent.pop(0)
-            #
-            #     # to do:
-            #     # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
-            #     tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-            #     grandpa.insert(1, tense)
+            # NOTE: To access the left-child node    (object) of a tree node:  t[0]
+            # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
+            # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
+            # NOTE: To whoever designed nltk.tree: That's fucked
+            left_child = t[0]
+            if left_child.label != 'C':
+                left_child_terminal = left_child[0]
+                complement_node = nltk.tree.Tree.fromstring(f"(C {left_child_terminal})")
+                t.remove(t[0])
+                t.insert(0, complement_node)
 
         for child in t:
             self.add_complement(child)
