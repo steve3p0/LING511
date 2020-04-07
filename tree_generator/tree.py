@@ -131,6 +131,63 @@ class Tree(object):
         new_tree = nltk.tree.Tree.fromstring(new_tree_str)
         return new_tree
 
+    def collapse_duplicate_nodes(self, t, label):
+        try:
+            t.label()
+        except AttributeError:
+            return
+
+        if t.label() == label:
+            current = t
+            parent = current.parent()
+            if parent.label() == label and current.right_sibling() is None:
+                current = t
+                parent = current.parent()
+
+                # We are going to pop the left sibling move it down to the left most
+                left_sibling = t.left_sibling()
+                p_left_child = nltk.tree.ParentedTree.convert(left_sibling)
+                #p_parent = nltk.tree.ParentedTree.convert(parent)
+                parent.pop(0)
+
+                # Now get the grandparent
+                grandpa = parent.parent()
+
+                # Now insert the popped off left_child into the left-most current child
+                current.insert(0, p_left_child)
+
+                print("hey")
+                # parent = current.parent()
+                # grandpa = parent.parent()
+                #
+                # Now pop off grandparent's right most child
+                #grandpa.pop(1)
+                grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                grandpa.pop(2)
+                #grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                print("hey 2")
+
+                # p_promoted = nltk.tree.ParentedTree.convert(current)
+                current = nltk.tree.ParentedTree.convert(current)
+                grandpa.insert(2, current)
+                #t = nltk.tree.ParentedTree.convert(current)
+                t = grandpa[2]
+                print("hey 2")
+
+        for child in t:
+            self.collapse_duplicate_nodes(child, label)
+
+    def collapse_duplicate(self, t):
+        # VBN - Verb, past participle
+        # VBP - Verb, non-3rd person singular present
+        # VBZ
+        ptree = nltk.tree.ParentedTree.convert(t)
+        tags = "VP"
+        self.collapse_duplicate_nodes(ptree, tags)
+        new_tree_str = str(ptree)
+        new_tree = nltk.tree.Tree.fromstring(new_tree_str)
+        return new_tree
+
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
         tree = self.promote_modals_to_tense(tree)

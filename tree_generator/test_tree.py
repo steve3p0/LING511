@@ -194,3 +194,47 @@ class TestTreeIntegration(unittest.TestCase):
         steve_tree.write_to_file(actual_tree, "moved_VZD_to_T")
         self.assertEqual(actual_tree, expected_tree)
 
+    def test_collapse_duplicate_nodes(self):
+        expected_tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (T did)
+          (VP
+            (RB not)
+            (VB think)
+            (SBAR
+              (S
+                (NP (DT the) (NN buffalo))
+                (VP (MD would) (VP (VB eat) (NP (PRP them))))
+              )
+            )
+          )
+        )""")
+        expected_tree = nltk_tree.fromstring(expected_tree_str)
+
+        before_tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (T did)
+          (VP
+            (RB not)
+            (VP
+              (VB think)
+              (SBAR
+                (S
+                  (NP (DT the) (NN buffalo))
+                  (VP (MD would) (VP (VB eat) (NP (PRP them))))
+                )
+              )
+            )
+          )
+        )""")
+
+        before_tree = nltk_tree.fromstring(before_tree_str)
+        steve_tree = Tree()
+        actual_tree = steve_tree.collapse_duplicate(before_tree)
+        print(f"Actual Tree: \n{actual_tree}\n")
+
+        steve_tree.write_to_file(actual_tree, "collapse_duplicate_nodes")
+        self.assertEqual(actual_tree, expected_tree)
+
