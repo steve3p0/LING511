@@ -161,7 +161,21 @@ class TestTreeIntegration(unittest.TestCase):
         #   )
         # )""")
 
-        before_tree = inspect.cleandoc("""
+        expected_tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NNS animals))
+          (T did)
+          (VP
+            (RB not)
+            (VP
+              (VB think)
+              (SBAR
+                (S
+                  (NP (DT the) (NN buffalo))
+                  (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
+        expected_tree = nltk_tree.fromstring(expected_tree_str)
+
+        before_tree_str = inspect.cleandoc("""
         (S
           (NP (DT The) (NNS animals))
           (VP
@@ -174,11 +188,15 @@ class TestTreeIntegration(unittest.TestCase):
                   (NP (DT the) (NN buffalo))
                   (VP (MD would) (VP (VB eat) (NP (PRP them)))))))))""")
 
-        tree = ParentedTree.fromstring(before_tree)
+        tree = ParentedTree.fromstring(before_tree_str)
         steve_tree = Tree()
-        new_tree = []
-        steve_tree.traverse(tree, new_tree)
+        steve_tree.traverse(tree)
+        new_tree_str = str(tree)
+        actual_tree = nltk_tree.fromstring(new_tree_str)
         #print(new_tree) # [ParentedTree('NP', [ParentedTree('NNP', [])])]
         #print(f"Expected String: \n{expected_tree_str}\n")
-        print(f"New Tree: \n{tree}\n")
+        print(f"Actual Tree: \n{actual_tree}\n")
+
+        steve_tree.write_to_file(actual_tree, "moved_VZD_to_T")
+        self.assertEqual(actual_tree, expected_tree)
 

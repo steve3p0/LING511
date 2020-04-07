@@ -125,7 +125,7 @@ class Tree(object):
     #     for child in t:
     #         self.traverse(child, np_trees)
 
-    def traverse(self, t, np_trees):
+    def traverse(self, t):
         # VBN - Verb, past participle
         # VBP - Verb, non-3rd person singular present
         # VBZ
@@ -173,7 +173,7 @@ class Tree(object):
             #     current = current.parent()
 
         for child in t:
-            self.traverse(child, np_trees)
+            self.traverse(child)
 
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
