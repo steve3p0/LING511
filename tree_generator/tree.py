@@ -193,7 +193,7 @@ class Tree(object):
                 p_left_child = nltk.tree.ParentedTree.convert(left_sibling)
                 parent.pop(0)
 
-                # Now get the grandparent
+                # You have to refresh grandparent after pop
                 grandpa = parent.parent()
 
                 # Now insert the popped off left_child into the left-most current child
