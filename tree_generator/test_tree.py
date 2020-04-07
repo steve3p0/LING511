@@ -8,6 +8,42 @@ import inspect
 
 model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
+sentences = [
+    "The animals did not think the buffalo would eat them",
+    "They were afraid the buffalo would trample them",
+    "The buffalo were pursuing fresh grass",
+    "Those buffalo were large and lumbering",
+    "The herd that the animals had heard caused considerable alarm",
+    "One young buffalo trotted slowly behind the herd",
+    "He was smelling the fresh grass",
+    "This buffalo was wondering whether he would find any adventures",
+    "He was tired of the dry grassy plains",
+    "He thought that other places must be more interesting"
+]
+
+expected_parse_strings = [
+    # 1. The animals did not think the buffalo would eat them
+    "(TP (NP (D The) (N animals)) (T did) (VP (AdvP (Adv not)) (V think) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V eat) (NP (N them)))))))",
+    # 2. They were afraid the buffalo would trample them
+    "(TP (NP (N They)) (VP (V were) (AdjP (Adj afraid) (CP (TP (NP (D the) (N buffalo)) (T would) (VP (V trample) (NP (N them))))))))",
+    # 3. The buffalo were pursuing fresh grass
+    "(TP (NP (D The) (N buffalo)) (T were) (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass))))",
+    # 4. Those buffalo were large and lumbering
+    "(TP (NP (D Those) (N buffalo)) (T were) (VP (V were) (AdjP (Adj large) (Conj and) (Adj lumbering))))",
+    # 5. The herd that the animals had heard caused considerable alarm
+    "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (VBN heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))",
+    # 6. One young buffalo trotted slowly behind the herd
+    "(TP (NP (D One) (AdjP (Adj young)) (N buffalo)) (VP (VBN trotted) (AdvP (Adv slowly)) (PP (P behind) (NP (D the) (N herd)))))",
+    # 7. He was smelling the fresh grass
+    "(TP (NP (N He)) (T was) (VP (V smelling) (NP (D the) (AdjP (Adj fresh)) (N grass))))",
+    # 8. This buffalo was wondering whether he would find any adventures
+    "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (P whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))",
+    # 9. He was tired of the dry grassy plains
+    "(TP (NP (N He)) (T was) (VP (AdjP (Adj tired) (PP (P of) (NP (D the) (AdjP (Adj dry)) (AdjP (Adj grassy)) (N plains))))))",
+    # 10. He thought that other places must be more interesting
+    "(TP (NP (N He)) (T thought) (VP (CP (P that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (RBR more) (Adj interesting)))))))"
+]
+
 class TestTree(unittest.TestCase):
     def test_tree_to_string(self):
         self.fail()
@@ -68,20 +104,18 @@ class TestTreeIntegration(unittest.TestCase):
         actual_tree_str = inspect.cleandoc(str(actual_tree))
 
         if debug:
+            print("#########################################################################################")
+            print(f"Test Sentence {testid}: {sentence}:")
             print(f"Expected String: \n{expected_tree_str}\n")
             print(f"Actual String: \n{actual_tree_str}\n")
-            # expected_tree.draw()
-            # import threading
-            # actual_thread = threading.Thread(target=expected_tree.draw)
-            # actual_thread.start()
             tree.write_to_file(expected_tree, f"tree_expected_{testid}")
             tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
         return expected_tree, actual_tree
 
     # HW Tests: 10 Trees A Day # 3
-    # @unittest.skip("demonstrating skipping")
-    def test_ten_trees_a_all_all3(self):
+    @unittest.skip("skip old")
+    def test_ten_trees_a_all_old(self):
         sentences = [
             "The animals did not think the buffalo would eat them",
             "They were afraid the buffalo would trample them",
@@ -99,7 +133,50 @@ class TestTreeIntegration(unittest.TestCase):
         tree = Tree(parser)
         tree.parse_sentences(sentences)
 
-    def test_ten_trees_a_day_1(self):
+    def test_ten_trees_a_day_three(self):
+        sentences = [
+            # "The animals did not think the buffalo would eat them",
+            # "They were afraid the buffalo would trample them",
+            # "The buffalo were pursuing fresh grass",
+            # "Those buffalo were large and lumbering",
+            # "The herd that the animals had heard caused considerable alarm",
+            # "One young buffalo trotted slowly behind the herd",
+            "He was smelling the fresh grass",
+            "This buffalo was wondering whether he would find any adventures",
+            "He was tired of the dry grassy plains",
+            "He thought that other places must be more interesting"
+        ]
+
+        expected_parse_strings = [
+            # 1. The animals did not think the buffalo would eat them
+            # "(TP (NP (D The) (N animals)) (T did) (VP (AdvP (Adv not)) (V think) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V eat) (NP (N them)))))))",
+            # 2. They were afraid the buffalo would trample them
+            # "(TP (NP (N They)) (VP (V were) (AdjP (Adj afraid) (CP (TP (NP (D the) (N buffalo)) (T would) (VP (V trample) (NP (N them))))))))",
+            # # 3. The buffalo were pursuing fresh grass
+            # "(TP (NP (D The) (N buffalo)) (T were) (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass))))",
+            # # 4. Those buffalo were large and lumbering
+            # "(TP (NP (D Those) (N buffalo)) (T were) (VP (V were) (AdjP (Adj large) (Conj and) (Adj lumbering))))",
+            # # 5. The herd that the animals had heard caused considerable alarm
+            # "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (VBN heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))",
+            # # 6. One young buffalo trotted slowly behind the herd
+            # "(TP (NP (D One) (AdjP (Adj young)) (N buffalo)) (VP (VBN trotted) (AdvP (Adv slowly)) (PP (P behind) (NP (D the) (N herd)))))",
+            # 7. He was smelling the fresh grass
+            "(TP (NP (N He)) (T was) (VP (V smelling) (NP (D the) (AdjP (Adj fresh)) (N grass))))",
+            # 8. This buffalo was wondering whether he would find any adventures
+            "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (P whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))",
+            # 9. He was tired of the dry grassy plains
+            "(TP (NP (N He)) (T was) (VP (AdjP (Adj tired) (PP (P of) (NP (D the) (AdjP (Adj dry)) (AdjP (Adj grassy)) (N plains))))))",
+            # 10. He thought that other places must be more interesting
+            "(TP (NP (N He)) (T thought) (VP (CP (P that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (RBR more) (Adj interesting)))))))"
+        ]
+
+        i = 1
+        for sentence, expected_parse_str in zip(sentences, expected_parse_strings):
+            expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, i, True)
+            i += 1
+            self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_1_old(self):
         sentence = "The animals did not think the buffalo would eat them"
         expected_tree_str = inspect.cleandoc("""
         (TP
@@ -118,6 +195,11 @@ class TestTreeIntegration(unittest.TestCase):
 
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_tree_str, 1, True)
         self.assertEqual(actual_tree, expected_tree)
+
+    # def test_ten_trees_a_day_1(self):
+    #
+    #     expected_tree, actual_tree = self.get_expected_actual_trees(sentences[], expected_tree_str, 1, True)
+    #     self.assertEqual(actual_tree, expected_tree)
 
     def test_traverse(self):
         from nltk.tree import ParentedTree

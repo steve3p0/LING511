@@ -104,22 +104,48 @@ class Tree(object):
         label = mapping.get(tree.label(), tree.label())
         return nltk.tree.Tree(label, children)
 
+    # def promote_tense(self, t, modal_labels, new_label):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         return
+    #
+    #     if t.label() in modal_labels:
+    #         current = t
+    #         parent = current.parent()
+    #
+    #         if t.right_sibling().label() == modal_labels:
+    #             grandpa = parent.parent()
+    #             parent.pop(0)
+    #
+    #             # to do:
+    #             # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+    #             tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+    #             grandpa.insert(1, tense)
+    #
+    #     for child in t:
+    #         self.promote_tense(child, modal_labels, new_label)
+
     def promote_tense(self, t, modal_labels, new_label):
         try:
             t.label()
         except AttributeError:
             return
 
-        if t.label() in modal_labels:
+        label_child1 = t.label()
+        if label_child1 in modal_labels:
             current = t
             parent = current.parent()
-            grandpa = parent.parent()
-            parent.pop(0)
 
-            # to do:
-            # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
-            tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-            grandpa.insert(1, tense)
+            label_child12 = t.right_sibling().label()
+            if label_child12 in modal_labels:
+                grandpa = parent.parent()
+                parent.pop(0)
+
+                # to do:
+                # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+                tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+                grandpa.insert(1, tense)
 
         for child in t:
             self.promote_tense(child, modal_labels, new_label)
@@ -129,7 +155,8 @@ class Tree(object):
         # VBP - Verb, non-3rd person singular present
         # VBZ
         ptree = nltk.tree.ParentedTree.convert(t)
-        modal_tags = ["VBD", "MD"]
+        #modal_tags = ["VBD", "MD"]
+        modal_tags = ["V"]
         self.promote_tense(ptree, modal_tags, "T")
         new_tree_str = str(ptree)
         new_tree = nltk.tree.Tree.fromstring(new_tree_str)
@@ -235,9 +262,9 @@ class Tree(object):
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
-        tree = self.promote_modals_to_tense(tree)
         tree = self.collapse_duplicate(tree)
         tree = self.convert_tree_labels(tree, tag_mapping)
+        tree = self.promote_modals_to_tense(tree)
         tree = self.expand_phrase(tree)
 
         return tree[0]
