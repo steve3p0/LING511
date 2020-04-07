@@ -1,5 +1,5 @@
 import os
-#from nltk.parse import stanford
+from nltk.parse import stanford
 import nltk
 from nltk.draw.tree import TreeView
 from PIL import Image
@@ -16,12 +16,13 @@ from PIL import Image
 # Add that line to the path environment variable
 # You may have to reboot for the path environment variable to take effect
 
-#model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
+model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
 # mapping = {'NP-SBJ': 'NP', 'NP-TMP': 'NP'}
 tag_mapping = {
     # Sentence
     'S': 'TP',
+    'SINV': 'TP',
     'SBAR': 'CP',
     # Determiners
     'DT': 'D',
@@ -44,7 +45,7 @@ tag_mapping = {
     'RB': 'Adv',
     # Prepositions
     'IN': 'P',
-    # 'IN': 'C', sometimes IN is C (complement)?
+    #'IN': 'C',  # sometimes IN is C (complement)?
 
     # issues:
     # 1) IF MD IS tense, then it needs to be moved to and a transfer must occur
@@ -182,34 +183,18 @@ class Tree(object):
 
         if t.label() in preterminal_tags:
             current = t
-            current_position = t.treeposition()
             parent = current.parent()
             phrase_label = f"{t.label()}P"
             if parent.label() != phrase_label:
-                grandpa = parent.parent()
                 parent_index = current.parent_index()
                 new_child = nltk.tree.ParentedTree.convert(current)
-                #parent.pop(current_position)
-                #r = current.root()
-                #r.remove(current_position)
-                #r_list = list()
 
                 new_parent = nltk.tree.ParentedTree(phrase_label, [new_child])
                 parent.remove(current)
-
-                #new_parent = nltk.tree.ParentedTree("AdvP", [nltk.tree.ParentedTree([new_child])])
-                # new_parent = nltk.tree.ParentedTree(phrase_label, [
-                #     nltk.tree.ParentedTree('NOUN', ['dog'])])
-                #new_parent = nltk.tree.ParentedTree(f"{phrase_label}", new_child)
-                # new_parent = nltk.tree.ParentedTree.fromstring(f"{phrase_label}", new_child)
-                # new_parent = nltk.tree.ParentedTree.fromstring(f"({phrase_label})", [new_child])
-                # new_parent.insert(0, new_child)
-
-                #parent.insert(current_position, new_parent)
-                #grandpa.insert(parent_index, new_parent)
                 parent.insert(parent_index, new_parent)
-            # test t back to current before continuing to traverse.
-            t = new_child
+
+                # test t back to current before continuing to traverse.
+                t = new_child
 
         for child in t:
             self.expand_phrase_nodes(child, preterminal_tags)
@@ -253,6 +238,7 @@ class Tree(object):
         tree = self.promote_modals_to_tense(tree)
         tree = self.collapse_duplicate(tree)
         tree = self.convert_tree_labels(tree, tag_mapping)
+        tree = self.expand_phrase(tree)
 
         return tree[0]
 
@@ -266,23 +252,24 @@ class Tree(object):
             print(f"{i}. {s}\n{tree_str}\n")
             self.write_to_file(tree, filename)
 
-# if __name__ == '__main__':
-#     # sentences = ["He thought that other places must be more interesting"]
-#
-#     sentences = [
-#                     "The animals did not think the buffalo would eat them",
-#                     "They were afraid the buffalo would trample them",
-#                     "The buffalo were pursuing fresh grass",
-#                     "Those buffalo were large and lumbering",
-#                     "The herd that the animals had heard caused considerable alarm",
-#                     "One young buffalo trotted slowly behind the herd",
-#                     "He was smelling the fresh grass",
-#                     "This buffalo was wondering whether he would find any adventures",
-#                     "He was tired of the dry grassy plains",
-#                     "He thought that other places must be more interesting"
-#                 ]
-#
-#     parser = stanford.StanfordParser(model_path=model_path)
-#     tree_builder = TreeBuilder(parser)
-#     tree_builder.parse_sentences(sentences)
+
+if __name__ == '__main__':
+    # sentences = ["He thought that other places must be more interesting"]
+
+    sentences = [
+                    "The animals did not think the buffalo would eat them",
+                    "They were afraid the buffalo would trample them",
+                    "The buffalo were pursuing fresh grass",
+                    "Those buffalo were large and lumbering",
+                    "The herd that the animals had heard caused considerable alarm",
+                    "One young buffalo trotted slowly behind the herd",
+                    "He was smelling the fresh grass",
+                    "This buffalo was wondering whether he would find any adventures",
+                    "He was tired of the dry grassy plains",
+                    "He thought that other places must be more interesting"
+                ]
+
+    parser = stanford.StanfordParser(model_path=model_path)
+    tree_builder = Tree(parser)
+    tree_builder.parse_sentences(sentences)
 
