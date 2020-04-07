@@ -271,6 +271,9 @@ class Tree(object):
 
         if t.label() == 'CP':
             current = t
+
+            # If there is only one child node of a Complement Clause (CP),
+            # Then it is missing it's complement, therefore, INSERT AN EMPTY SET CLAUSE
             if len(current) == 1:
                 # (C Ø)  <- The empty set
                 empty_set_node = nltk.tree.Tree.fromstring("(C Ø)")
@@ -280,10 +283,13 @@ class Tree(object):
             # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
             # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
             # NOTE: To whoever designed nltk.tree: That's fucked
-            left_child = t[0]
-            if left_child.label != 'C':
-                left_child_terminal = left_child[0]
-                complement_node = nltk.tree.Tree.fromstring(f"(C {left_child_terminal})")
+
+            # Else, if there is more than one child node,
+            # Then check it is not complement, replace it's label with C
+            # NOTE: This is because you failed to set it correctly when you shift a verb tense tense
+            # object, because that object was tagged as a preposition (P)
+            elif t[0].label != 'C':
+                complement_node = nltk.tree.Tree.fromstring(f"(C {t[0][0]})")
                 t.remove(t[0])
                 t.insert(0, complement_node)
 
