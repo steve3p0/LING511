@@ -131,6 +131,50 @@ class Tree(object):
         new_tree = nltk.tree.Tree.fromstring(new_tree_str)
         return new_tree
 
+    # def collapse_duplicate_nodes(self, t, label):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         return
+    #
+    #     if t.label() == label:
+    #         current = t
+    #         parent = current.parent()
+    #         if parent.label() == label and current.right_sibling() is None:
+    #             current = t
+    #             parent = current.parent()
+    #
+    #             # We are going to pop the left sibling move it down to the left most
+    #             left_sibling = t.left_sibling()
+    #             p_left_child = nltk.tree.ParentedTree.convert(left_sibling)
+    #             parent.pop(0)
+    #
+    #             # Now get the grandparent
+    #             grandpa = parent.parent()
+    #
+    #             # Now insert the popped off left_child into the left-most current child
+    #             current.insert(0, p_left_child)
+    #
+    #             # Now Pop of the right post child of grandpa
+    #             grandpa = nltk.tree.ParentedTree.convert(grandpa)
+    #             num_of_grandchildern = len(grandpa)
+    #             print(f"num_of_grandchildern: {num_of_grandchildern}")
+    #             #grandpa.pop(2)
+    #             grandpa.pop(num_of_grandchildern - 1)
+    #
+    #             # Now promote up the duplicate child
+    #             current = nltk.tree.ParentedTree.convert(current)
+    #             num_of_grandchildern = len(grandpa)
+    #             grandpa.insert(num_of_grandchildern, current)
+    #             grandpa = nltk.tree.ParentedTree.convert(grandpa)
+    #             num_of_grandchildern = len(grandpa)
+    #             #t = grandpa[2]
+    #             t = grandpa[num_of_grandchildern - 1]
+    #             print("hey 2")
+    #
+    #     for child in t:
+    #         self.collapse_duplicate_nodes(child, label)
+
     def collapse_duplicate_nodes(self, t, label):
         try:
             t.label()
@@ -147,7 +191,6 @@ class Tree(object):
                 # We are going to pop the left sibling move it down to the left most
                 left_sibling = t.left_sibling()
                 p_left_child = nltk.tree.ParentedTree.convert(left_sibling)
-                #p_parent = nltk.tree.ParentedTree.convert(parent)
                 parent.pop(0)
 
                 # Now get the grandparent
@@ -156,26 +199,18 @@ class Tree(object):
                 # Now insert the popped off left_child into the left-most current child
                 current.insert(0, p_left_child)
 
-                print("hey")
-                # parent = current.parent()
-                # grandpa = parent.parent()
-                #
-                # Now pop off grandparent's right most child
-                #grandpa.pop(1)
-                grandpa = nltk.tree.ParentedTree.convert(grandpa)
-                grandpa.pop(2)
-                #grandpa = nltk.tree.ParentedTree.convert(grandpa)
-                print("hey 2")
+                # Now Pop of the right post child of grandpa
+                grandpa.pop(len(grandpa) - 1)
 
-                # p_promoted = nltk.tree.ParentedTree.convert(current)
+                # Now promote up the duplicate child to the right most child of the grandparent
                 current = nltk.tree.ParentedTree.convert(current)
-                grandpa.insert(2, current)
-                #t = nltk.tree.ParentedTree.convert(current)
-                t = grandpa[2]
+                grandpa.insert(len(grandpa), current)
+                t = grandpa[len(grandpa) - 1]
                 print("hey 2")
 
         for child in t:
             self.collapse_duplicate_nodes(child, label)
+
 
     def collapse_duplicate(self, t):
         # VBN - Verb, past participle
