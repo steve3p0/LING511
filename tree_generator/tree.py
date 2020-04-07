@@ -1,5 +1,6 @@
 import os
-from nltk.parse import stanford
+#from nltk.parse import stanford
+import nltk
 from nltk.draw.tree import TreeView
 from PIL import Image
 
@@ -15,18 +16,62 @@ from PIL import Image
 # Add that line to the path environment variable
 # You may have to reboot for the path environment variable to take effect
 
-model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
+#model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
+# mapping = {'NP-SBJ': 'NP', 'NP-TMP': 'NP'}
+tag_mapping = {
+    # Sentence
+    'S': 'TP',
+    'SBAR': 'CP',
+    # Determiners
+    'DT': 'D',
+    'CD': 'D',
+    # Nouns
+    'NN': 'N',
+    'NNS': 'N',
+    'PRP': 'N',
+    # Verbs
+    'VB': 'V',
+    'VBD': 'V',
+    'VBG': 'V',
+    # Adjectives
+    'ADJP': 'AdjP',
+    'JJ': 'Adj',  # Need to convert JJ to AdjP -> Adj
+    # Conjuctions
+    'CC': 'Conj',
+    # Adverbs
+    'ADVP': 'AdvP',
+    'RB': 'Adv',
+    # Prepositions
+    'IN': 'P',
+    # 'IN': 'C', sometimes IN is C (complement)?
+
+    # issues:
+    # 1) IF MD IS tense, then it needs to be moved to and a transfer must occur
+    #    look at #8 from 10TAD3
+    # 2) JJ : AdjP -> Adj
+    # 3) Complementizer Phrases
+    #     a) # empty set C: ∅
+    #        see #8 from 10TAD3
+    #
+    #
+
+
+    # '': '',
+    # '': '',
+    # '': '',
+    # '': '',
+}
 
 class Tree(object):
-    def __init__(self, parser):
+    def __init__(self, parser=None):
         self.parser = parser
 
     @staticmethod
     def tree_to_string(tree):
-        # s = str(tree)
+        s = str(tree)
         # pformat(self, margin=70, indent=0, nodesep="", parens="()", quotes=False)
-        s = tree.pformat()
+        #s = tree.pformat()
         return s
 
     @staticmethod
@@ -42,9 +87,29 @@ class Tree(object):
                 img.load(scale=4)
                 img.save(f"{filename}.png")
 
+
+    def convert_tree_labels(self, tree, mapping):
+        # '''
+        # >>> convert_tree_labels(Tree('S', [Tree('NP-SBJ', [('foo', 'NN')])]), {'NP-SBJ': 'NP'})
+        # Tree('S', [Tree('NP', [('foo', 'NN')])])
+        # '''
+        children = []
+
+        for t in tree:
+            if isinstance(t, nltk.tree.Tree):
+                children.append(self.convert_tree_labels(t, mapping))
+            else:
+                children.append(t)
+
+        label = mapping.get(tree.label(), tree.label())
+        return nltk.tree.Tree(label, children)
+
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
-        return tree
+        tree = self.convert_tree_labels(tree, tag_mapping)
+        # Get rid of of ROOT node
+        return tree[0]
+        #return tree
 
     def parse_sentences(self, sentences):
         i = 0
@@ -53,9 +118,8 @@ class Tree(object):
             filename = f"tree_{i}"
             tree = self.parse_sentence(s)
             tree_str = self.tree_to_string(tree)
-            print(tree_str)
+            print(f"{i}. {s}\n{tree_str}\n")
             self.write_to_file(tree, filename)
-
 
 # if __name__ == '__main__':
 #     # sentences = ["He thought that other places must be more interesting"]
