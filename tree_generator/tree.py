@@ -373,106 +373,6 @@ class Tree(object):
         label = mapping.get(tree.label(), tree.label())
         return nltk.tree.Tree(label, children)
 
-    #### VERSION 1 ########################################
-    # def promote_tense(self, t):
-    #     try:
-    #         t.label()
-    #     except AttributeError:
-    #         return
-    #
-    #     if t.label() in MODAL_TAGS:
-    #         current = t
-    #         parent = current.parent()
-    #
-    #         # label_child1 (current) is an only child
-    #         label_child1 = t.label()
-    #
-    #
-    #
-    #         label_child2 = t.right_sibling().label()
-    #         if label_child2 in MODAL_TAGS:
-    #             grandpa = parent.parent()
-    #             parent.pop(0)
-    #
-    #             # to do:
-    #             tense = nltk.tree.ParentedTree.fromstring(f"(TREXXXXXX {t[0]})")
-    #             #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-    #             grandpa.insert(1, tense)
-    #
-    #     for child in t:
-    #         self.promote_tense(child)
-
-    #### VERSION 2 ########################################
-    # def promote_tense(self, t, new_label):
-    #     try:
-    #         t.label()
-    #     except AttributeError:
-    #         return
-    #
-    #     # NOTE: To access the left-child node    (object) of a tree node:  t[0]
-    #     # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
-    #     # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
-    #     # NOTE: To whoever designed nltk.tree: That's fucked
-    #
-    #     # from itertools import groupby
-    #     # #a = [[i, len([*group])] for i, group in groupby(li)]
-    #     # count = [[leaf, len([*group])] for leaf, group in groupby(leaves)]
-    #     # if count > 1:
-    #
-    #     # Reverse dictionary lookup
-    #     # keys = [key for key, value in dict_obj.items() if value == 'value']
-    #
-    #     data = [1, 3, 5, 6, 5, 9, 3, 8, 5]
-    #     ind = data.index(5)
-    #     print(ind)
-    #
-    #     # leaves = t.leaves().index('V') #
-    #     # index = leaves('V')
-    #     # if index > :
-    #     #     if leaves(index + 1) == 'V':
-    #
-    #     # for leaf in t.leaves():
-    #     #     if leaf in MODAL_TAGS:
-    #     #         index_tense = t.leaves().index(leaf)
-    #     #         # check array boundary
-    #     #         if t.leaves()[index_tense + 1] in MODAL_TAGS:
-    #     #             index_verb = index_tense + 1
-    #
-    #     # leaves = t.leaves()
-    #     # for leaf in t.leaves():
-    #     #     if leaf in MODAL_TAGS:
-    #     #         index_tense = t.leaves().index(leaf)
-    #     #         if len(leaves) < len
-    #     #         if t.leaves()[index_tense + 1] in MODAL_TAGS:
-    #     #             index_verb = index_tense + 1
-    #
-    #
-    #
-    #
-    #
-    #
-    #     if t[0].label() in MODAL_TAGS:
-    #         current = t
-    #
-    #         if current.right_sibling() is None
-    #         parent = current.parent()
-    #
-    #         label_child12 = pcurrent.right_sibling().label()
-    #
-    #
-    #         if label_child12 in MODAL_TAGS:
-    #             grandpa = parent.parent()
-    #             parent.pop(0)
-    #
-    #             # to do:
-    #             tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
-    #             #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-    #             grandpa.insert(1, tense)
-    #
-    #     for child in t:
-    #         self.promote_tense(child, new_label)
-
-    #### VERSION 3 ########################################
     def promote_tense(self, t):
         try:
             t.label()
@@ -680,18 +580,6 @@ class Tree(object):
         for child in t:
             self.add_complement(child)
 
-    # def parse_sentence(self, sentence):
-    #     tree = next(self.parser.raw_parse(sentence))
-    #
-    #     tree = self.collapse_duplicate(tree)
-    #     tree = self.convert_tree_labels(tree, tag_mapping)
-    #     tree = self.promote_modals_to_tense(tree)
-    #     #self.promote_tense(tree, modal_tags, "T")
-    #     tree = self.expand_phrase(tree)
-    #     self.add_complement(tree)
-    #
-    #     return tree[0]
-
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
@@ -702,10 +590,6 @@ class Tree(object):
         # self.write_to_file(tree, "XXXXXX")
         ###############
 
-        # tree = self.promote_modals_to_tense(tree)
-        # #self.promote_tense(tree, modal_tags, "T")
-
-         # Convert to nltk.ParentedTree before promoting any past tense verbs
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
         tree = nltk.Tree.convert(tree)
