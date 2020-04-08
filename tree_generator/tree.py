@@ -479,66 +479,16 @@ class Tree(object):
         except AttributeError:
             return
 
-        # If both current (a past tense verb) and current's
-        # if the very next terminal is a verb, then t (current) is a past test verb
-        # TODO: change process_sentence to not call convert_tags so that you
-        # make sure right_sibling in a present tense ver
-        if (t.label() in MODAL_TAGS):
+        if t.label() in MODAL_TAGS:
             current = t
-            #parent = current.parent()
-            parent = t.parent()
-            grandpa = parent.parent()
-
-            # Refresh all trees and subtrees in ParentedTree
-            current = nltk.tree.ParentedTree.convert(current)
-
-            right_sibling = getattr(t.right_sibling(), 'label', lambda: None)()
-            #right_sibling = nltk.tree.ParentedTree.convert(right_sibling)
+            parent = current.parent()
+            right_sibling = getattr(current.right_sibling(), 'label', lambda: None)()
 
             if right_sibling in MODAL_TAGS:
-                #right_sibling = getattr(t.right_sibling(), 'label', None)
-                # Create new Tense node (pre-terminal T with terminal moodal past tense verb)
-                # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
                 tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
-                tense_node = nltk.tree.ParentedTree.convert(tense_node)
-
-                # Save copy of the granparent's node - to get the index where to move the new Tense node
-                # TODO: I could probably use parent.parent() instead of grandpa - saving it might not be
-                # necessary since parent wasn't removed.
-                # parent = parent()
-                # # TODO: KEEP THIS OR NOT?
-                parent = nltk.tree.ParentedTree.convert(parent)
-
-                # Get position just left of the right most child of grandparent (right-most-node should be a VP)
-                # So -1 for index of right-most-child-of grandparent, and then -1 to get the node left of that
-                index = len(parent) - 2
-
-                # Pop or remove current node
-                # parent.pop(0)
-                #parent = nltk.tree.ParentedTree.convert(parent)
-                #parent.pop(index)
                 parent.remove(current)
-                # referesh
-                parent = nltk.tree.ParentedTree.convert(parent)
-
-                # Insert new Tense (T) Node into new position
-                #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-
-                #grandpa.insert(1, tense)
-
-                # TODO: Do I need this first to refresh
-                # index = len(grandpa) - 2
-                current = nltk.tree.ParentedTree.convert(current)
-
-                # grandpa = parent.parent()
-                grandpa = nltk.tree.ParentedTree.convert(grandpa)
-                index = len(grandpa) - 1
-
-                grandpa.insert(index, tense_node)
-                current = nltk.tree.ParentedTree.convert(current)
-                print("T moved")
-                # grandpa = nltk.ParentedTree(parent.parent())
-                t = nltk.tree.ParentedTree.convert(t)
+                grandpa = parent.parent()
+                grandpa.insert(len(grandpa) - 1, tense_node)
 
         for child in t:
             self.promote_tense(child)
@@ -758,11 +708,10 @@ class Tree(object):
          # Convert to nltk.ParentedTree before promoting any past tense verbs
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
-        # Change back to nltk.Tree after finishing tree transforms rquired by promoting test
-        #tree = str(tree)
+        tree = nltk.Tree.convert(tree)
 
-        #tree = self.expand_phrase(tree)
-        #self.add_complement(tree)
+        tree = self.expand_phrase(tree)
+        self.add_complement(tree)
 
         return tree[0]
 
