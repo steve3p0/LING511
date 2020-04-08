@@ -1,12 +1,21 @@
 import nose
 import unittest
-from tree import Tree
 from nltk.parse import stanford
 from nltk import Tree as nltk_tree
 from nltk.draw.tree import TreeView
 import inspect
 
+#import unittest
+from nose.tools import eq_, assert_almost_equals, assert_greater_equal
+#import inspect
+import os
+from io import StringIO
+import logging
+
+from tree import Tree
+
 model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
+
 
 class TestTree(unittest.TestCase):
     def test_tree_to_string(self):
@@ -15,10 +24,12 @@ class TestTree(unittest.TestCase):
     def test_write_to_file(self):
         self.fail()
 
-    def test_parse_sentence_integration(self):
+    def test_parse_stanford(self):
         sentence = "He thought that other places must be more interesting"
-        parser = stanford.StanfordParser(model_path=model_path)
-        tree = Tree(parser)
+
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        tree = Tree(parser=stanford_parser)
+
         t = tree.parse_sentence(sentence)
         actual_str = inspect.cleandoc(tree.tree_to_string(t))
         print(f"Actual String: \n{actual_str}")
@@ -45,8 +56,8 @@ class TestTree(unittest.TestCase):
         expected_tree = nltk_tree.fromstring(tree_s)
         expected_str = inspect.cleandoc(str(expected_tree))
 
-        parser = stanford.StanfordParser(model_path=model_path)
-        tree = Tree(parser)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        tree = Tree(parser=stanford_parser)
         actual_tree = tree.parse_sentence(sentence)
         actual_str = inspect.cleandoc(str(actual_tree))
 
@@ -220,24 +231,87 @@ class TestTree(unittest.TestCase):
 class TestTreeIntegration(unittest.TestCase):
     @staticmethod
     def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False):
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+
+        tree = Tree(parser=stanford_parser)
         expected_tree = nltk_tree.fromstring(expected_tree_str)
 
-        parser = stanford.StanfordParser(model_path=model_path)
-        tree = Tree(parser)
         actual_tree = tree.parse_sentence(sentence)
         actual_tree_str = inspect.cleandoc(str(actual_tree)).replace('\n', '').replace('\r', '').replace('  ', ' ')
 
+        # tree.write_to_file(expected_tree, "tree_expected_XX")
+        # tree.write_to_file(actual_tree, "tree_expected_XX")
+
         if debug:
             print("#########################################################################################")
-            print(f"Test Sentence {testid}: {sentence}:")
-            # print(f"Expected String: \n{expected_tree_str}\n")
-            # print(f"Actual String: \n{actual_tree_str}\n")
+            print(f"Test Sentence {testid}:\n {sentence}:")
+
             print(f"Expected String: \n{str(expected_tree)}\n")
             print(f"Actual String: \n{str(actual_tree)}\n")
+
             tree.write_to_file(expected_tree, f"tree_expected_{testid}")
             tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
+            ohsu_tree = Tree.from_string(expected_tree_str)
+            expect_pretty_str = ohsu_tree.pretty()
+            print(f"{testid}) EXPECTED PRETTY: ********************************")
+            print(expect_pretty_str)
+
+            ohsu_tree = Tree.from_string(actual_tree_str)
+            actual_pretty_str = ohsu_tree.pretty()
+            print(f"{testid}) ACTUAL PRETTY: **********************************")
+            print(actual_pretty_str)
+
         return expected_tree, actual_tree
+
+    @unittest.skip("")
+    def test_productions_demo(self):
+        # s = inspect.cleandoc("""
+        #     (TOP
+        #         (NP-SBJ
+        #             (DT these)
+        #             (NNS funds)
+        #         )
+        #         (ADVP-TMP
+        #             (RB now)
+        #         )
+        #         (VP
+        #             (VBP account)
+        #             (PP-CLR
+        #                 (IN for)
+        #                 (NP
+        #                     (NP
+        #                         (NP
+        #                             (QP
+        #                                 (JJ several)
+        #                                 (NNS billions)
+        #                             )
+        #                         )
+        #                         (PP
+        #                             (IN of)
+        #                             (NP
+        #                                 (NNS dollars)
+        #                             )
+        #                         )
+        #                     )
+        #                     (PP
+        #                         (IN in)
+        #                         (NP
+        #                             (NNS assets)
+        #                         )
+        #                     )
+        #                 )
+        #             )
+        #         )
+        #         (. .)
+        #     )""")
+
+        s = "(TP (NP (D The) (N dog)) (VP (V chased) (NP (D the) (N cat))))"
+        t_before = Tree.from_string(s)
+
+        print('BEFORE: *************************')
+        before = t_before.pretty()
+        print(before)
 
     def test_ten_trees_a_day_three_01(self):
         sentence = "The animals did not think the buffalo would eat them"
@@ -274,7 +348,7 @@ class TestTreeIntegration(unittest.TestCase):
     def test_ten_trees_a_day_three_05(self):
         sentence = "The herd that the animals had heard caused considerable alarm"
         expected_parse_str = \
-            "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (VBN heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))"
+            "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (V heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))"
 
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 5, True)
         self.assertEqual(actual_tree, expected_tree)

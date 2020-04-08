@@ -1,8 +1,21 @@
 import os
+from typing import Dict, Any, Union
+
 from nltk.parse import stanford
 import nltk
 from nltk.draw.tree import TreeView
 from PIL import Image
+
+# taken from ohsu_tree
+import logging
+import sys
+import re
+#import os
+from re import escape, finditer
+import collections
+from collections import defaultdict
+import itertools
+import operator
 
 # Requirements:
 # This script requires Ghostscript for image conversion
@@ -18,8 +31,43 @@ from PIL import Image
 
 model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
+# left and delimiters on trees
+LDEL = '('
+RDEL = ')'
+LDELE = escape(LDEL)
+RDELE = escape(RDEL)
+DELIMITERS = r'({})|({})'.format(LDELE, RDELE)
+
+# labels are a sequence of non-whitespace, non-delimiter characters used
+# both for terminals and non-terminals
+LABEL = r'[^\s{}{}]+'.format(LDELE, RDELE)
+
+# a "token" consists of:
+# * a left delimiter
+# * possibly some whitespace (though not usually)
+# * one of:
+#   - a label for a head (possibly null)
+#   - a right delimiter
+#   - a label for a terminal
+TOKEN = r'({0})\s*({2})?|({1})|({2})'.format(LDELE, RDELE, LABEL)
+
+# characters for naming heads introduced by tree transformation; should
+# not overlap LDEL or RDEL if you are writing to text files
+CU_JOIN_CHAR = '+'
+MARKOVIZE_CHAR = '|'
+CNF_JOIN_CHAR = '&'
+CNF_LEFT_DELIMITER = '<'
+CNF_RIGHT_DELIMITER = '>'
+
 # mapping = {'NP-SBJ': 'NP', 'NP-TMP': 'NP'}
-tag_mapping = {
+
+# MODAL_TAGS = ["VBD", "MD"]
+MODAL_TAGS = ["V"]
+TENSE_TAG = 'T'
+
+# Reverse dictionary lookup
+# keys = [key for key, value in dict_obj.items() if value == 'value']
+tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     # Sentence
     'S': 'TP',
     'SINV': 'TP',
@@ -68,9 +116,164 @@ tag_mapping = {
     # '': '',
 }
 
+
 class Tree(object):
-    def __init__(self, parser=None):
+
+    # def __init__(self, parser=None):
+    #     self.parser = parser
+
+    def __init__(self, label=None, daughters=None, parser=None):
+        self.label = label
+        self.daughters = daughters if daughters else []
         self.parser = parser
+
+    def __repr__(self):
+        return self.pretty()
+
+    ############################################################################
+    # magic methods for access, etc., all using self.daughters
+
+    def __iter__(self):
+        return iter(self.daughters)
+
+    def __getitem__(self, i):
+        return self.daughters[i]
+
+    def __setitem__(self, i, value):
+        self.daughters[i] = value
+
+    def __len__(self):
+        return len(self.daughters)
+
+
+    def pretty(self, indent=0, step=4):
+        """
+        Serialize tree into human-readable multiline string
+
+        >>> s = '(TOP (S (VP (TO to) (VP (VB play)))))'
+        >>> t = Tree.from_string(s)
+        >>> t
+        (TOP
+            (S
+                (VP
+                    (TO to)
+                    (VP
+                        (VB play)
+                    )
+                )
+            )
+        )
+        """
+        string = LDEL + self.label
+        i = indent + step
+        is_tree = None
+        for daughter in self:
+            is_terminal = Tree.terminal(daughter)
+            if is_terminal:
+                string += ' ' + daughter
+            else:
+                # recursively print with increased indent
+                string += '\n' + (' ' * i) + daughter.pretty(i)
+        # add a newline and spaces after last non-terminal at this depth
+        if not is_terminal:
+            string += '\n' + (' ' * indent)
+        string += RDEL
+        return string
+
+
+    @classmethod
+    def from_string(cls, string):
+        r"""
+        Read a single Treebank-style tree from a string. Example:
+
+        >>> s = '(ADVP (ADV widely) (CONJ and) (ADV friendly))'
+        >>> Tree.from_string(s)
+        (ADVP
+            (ADV widely)
+            (CONJ and)
+            (ADV friendly)
+        )
+
+        It doesn't break just because there are weird newlines, either:
+
+        >>> str(Tree.from_string(s)) == \
+        ... str(Tree.from_string(s.replace(' ', '\n')))
+        True
+
+        A few types of errors are known:
+
+        >>> Tree.from_string(s[:-1])
+        Traceback (most recent call last):
+        ...
+        ValueError: End-of-string, need /\)/
+        >>> Tree.from_string(s[1:])
+        Traceback (most recent call last):
+        ...
+        ValueError: Need /\(/
+        >>> s_without_head = s[6:-1]
+        >>> Tree.from_string(s_without_head)
+        Traceback (most recent call last):
+        ...
+        ValueError: String contains 3 trees
+        """
+        # initialize stack to "empty"
+        stack = [(None, [])]
+        for m in finditer(TOKEN, string):
+            token = m.group()
+            if m.group(1):  # left delimiter
+                stack.append((m.group(2), []))
+            elif m.group(3):  # right delimiter
+                # if stack is "empty", there is nothing in need of closure
+                if len(stack) == 1:
+                    raise ValueError('Need /{}/'.format(LDELE))
+                (mother, children) = stack.pop()
+                stack[-1][1].append(cls(mother, children))
+            elif m.group(4):  # leaf
+                stack[-1][1].append(m.group(4))
+            else:
+                raise ValueError('Parsing failure: {}'.format(m.groups()))
+        # check to make sure the stack is "empty"
+        if len(stack) > 1:
+            raise ValueError('End-of-string, need /{}/'.format(RDELE))
+        elif len(stack[0][1]) == 0:
+            raise ValueError('End-of-string, need /{}/'.format(LDELE))
+        elif len(stack[0][1]) > 1:
+            raise ValueError('String contains {} trees'.format(
+                len(stack[0][1])))
+        return stack[0][1][0]
+
+    @classmethod
+    def from_stream(cls, handle):
+        r"""
+        Given a treebank-style data *.psd file, yield all its Trees, using
+        `from_string` above
+
+        Mock up a real file using cStringIO
+
+        >>> from io import StringIO
+        >>> s = '(ADVP (ADV widely) (CONJ and) (ADV friendly))'
+        >>> source = StringIO(s.replace(' ', '\n\n\n') + s)
+        >>> (one, two) = Tree.from_stream(source)
+        >>> str(one) == str(two)
+        True
+        """
+        # TODO I am deeply unhappy with this solution. It would be nicer
+        # to use the cleverer logic found in Tree.from_string instead.
+        stack = 0
+        start = 0
+        string = handle.read()
+        for m in finditer(DELIMITERS, string):
+            # left bracket
+            if m.group(1):
+                stack += 1
+            # right bracket
+            else:
+                stack -= 1
+                # if brackets match, parse it
+                if stack == 0:
+                    end = m.end()
+                    yield Tree.from_string(string[start:end])
+                    start = end
 
     @staticmethod
     def tree_to_string(tree):
@@ -78,6 +281,68 @@ class Tree(object):
         # pformat(self, margin=70, indent=0, nodesep="", parens="()", quotes=False)
         #s = tree.pformat()
         return s
+
+    ############################################################################
+    # static methods for traversal (etc.)
+
+    @staticmethod
+    def terminal(obj):
+        return not hasattr(obj, 'label')
+
+    @staticmethod
+    def preterminal(obj):
+        for child in obj:
+            return not hasattr(child, 'label')
+
+        return False
+
+    @staticmethod
+    def unary(obj):
+        return len(obj) == 1
+
+    def binary(obj):
+        return len(obj) == 2
+
+    @staticmethod
+    def ternary(obj):
+        return len(obj) == 3
+
+    @staticmethod
+    def several(obj):
+        # 3 or more
+        return len(obj) > 2
+
+    @staticmethod
+    def get_label(obj):
+        terminal = Tree.terminal(obj)
+        if terminal:
+            return obj
+        return obj.label
+
+    @staticmethod
+    def unary_daughter_is_terminal(mother):
+        if not Tree.unary(mother):
+            return False
+
+        if not Tree.terminal(mother.daughters[0]):
+            return False
+
+        return True
+
+    @staticmethod
+    def binary_daughters_are_nonterminal(mother):
+        if not Tree.binary(mother):
+            return False
+
+        if Tree.terminal(mother.daughters[0]) or Tree.terminal(mother.daughters[0]):
+            return False
+
+        return True
+
+
+    ############################################################################################
+    ############################################################################################
+    ## New Code
 
     @staticmethod
     def write_to_file(tree, filename):
@@ -114,54 +379,242 @@ class Tree(object):
     #     except AttributeError:
     #         return
     #
+    #
     #     if t.label() in modal_labels:
     #         current = t
     #         parent = current.parent()
     #
-    #         if t.right_sibling().label() == modal_labels:
+    #         # label_child1 (current) is an only child
+    #         label_child1 = t.label()
+    #
+    #         label_child12 = t.right_sibling().label()
+    #         if label_child12 in modal_labels:
     #             grandpa = parent.parent()
     #             parent.pop(0)
     #
     #             # to do:
-    #             # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
-    #             tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+    #             tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+    #             #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
     #             grandpa.insert(1, tense)
     #
     #     for child in t:
     #         self.promote_tense(child, modal_labels, new_label)
 
-    def promote_tense(self, t, modal_labels, new_label):
+    # def promote_tense(self, t, new_label):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         return
+    #
+    #     # NOTE: To access the left-child node    (object) of a tree node:  t[0]
+    #     # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
+    #     # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
+    #     # NOTE: To whoever designed nltk.tree: That's fucked
+    #
+    #     # from itertools import groupby
+    #     # #a = [[i, len([*group])] for i, group in groupby(li)]
+    #     # count = [[leaf, len([*group])] for leaf, group in groupby(leaves)]
+    #     # if count > 1:
+    #
+    #     # Reverse dictionary lookup
+    #     # keys = [key for key, value in dict_obj.items() if value == 'value']
+    #
+    #     data = [1, 3, 5, 6, 5, 9, 3, 8, 5]
+    #     ind = data.index(5)
+    #     print(ind)
+    #
+    #     # leaves = t.leaves().index('V') #
+    #     # index = leaves('V')
+    #     # if index > :
+    #     #     if leaves(index + 1) == 'V':
+    #
+    #     # for leaf in t.leaves():
+    #     #     if leaf in MODAL_TAGS:
+    #     #         index_tense = t.leaves().index(leaf)
+    #     #         # check array boundary
+    #     #         if t.leaves()[index_tense + 1] in MODAL_TAGS:
+    #     #             index_verb = index_tense + 1
+    #
+    #     # leaves = t.leaves()
+    #     # for leaf in t.leaves():
+    #     #     if leaf in MODAL_TAGS:
+    #     #         index_tense = t.leaves().index(leaf)
+    #     #         if len(leaves) < len
+    #     #         if t.leaves()[index_tense + 1] in MODAL_TAGS:
+    #     #             index_verb = index_tense + 1
+    #
+    #
+    #
+    #
+    #
+    #
+    #     if t[0].label() in MODAL_TAGS:
+    #         current = t
+    #
+    #         if current.right_sibling() is None
+    #         parent = current.parent()
+    #
+    #         label_child12 = pcurrent.right_sibling().label()
+    #
+    #
+    #         if label_child12 in MODAL_TAGS:
+    #             grandpa = parent.parent()
+    #             parent.pop(0)
+    #
+    #             # to do:
+    #             tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+    #             #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+    #             grandpa.insert(1, tense)
+    #
+    #     for child in t:
+    #         self.promote_tense(child, new_label)
+
+    # def promote_tense(self, t, modal_labels, new_label):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         return
+    #
+    #     label_child1 = t.label()
+    #     if label_child1 in modal_labels:
+    #         current = t
+    #         parent = current.parent()
+    #
+    #         #label_child12 = t.right_sibling().label()
+    #         #if not t.right_sibling().label()
+    #         #if label_child12 in modal_labels:
+    #
+    #         try:
+    #             t.label()
+    #         except AttributeError:
+    #             # the right sibling is a tree
+    #             sibling_tree =  t.right_sibling()
+    #             if sibling_tree[0]
+    #
+    #             #return
+    #
+    #         grandpa = parent.parent()
+    #         parent.pop(0)
+    #
+    #         # to do:
+    #         tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+    #         #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
+    #         grandpa.insert(1, tense)
+    #
+    #
+    #
+    #     for child in t:
+    #         self.promote_tense(child, modal_labels, new_label)
+
+    def promote_tense(self, t):
         try:
             t.label()
         except AttributeError:
             return
 
-        label_child1 = t.label()
-        if label_child1 in modal_labels:
+        # NOTE: To access the left-child node    (object) of a tree node:  t[0]
+        # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
+        # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
+        # NOTE: To whoever designed nltk.tree: That's fucked
+
+        if t.label() in MODAL_TAGS:
             current = t
-            parent = current.parent()
+            #parent = current.parent()
+            parent = t.parent()
 
-            label_child12 = t.right_sibling().label()
-            if label_child12 in modal_labels:
+            # Refresh all ParentedTree objects - this is a hack
+            # This function is sometimes called by methods that may or may refresh
+            # It fixes an issue with not being able to access sibling and parent nodes
+            # To read more: http://www.nltk.org/howto/tree.html
+            #parent = nltk.tree.ParentedTree.convert(parent)
+            #nltk.Tree.fromstring(str(parent.root())).pretty_print()
+
+            # TODO: Question:
+            # Is it possible to have a past tense verb buried in subtrees that gets
+            # elevated to more the generation above it?
+
+            # TODO: Question:
+            # Does a past tense verb (always) end up second from the right of a tense phrase (TP)
+            #
+
+            # TODO: What if parent has siblings to the right?
+            #
+            #                           TP
+            #           ________________|_____________________
+            #          |         T           VB             PP
+            #         |          |           |              |
+            #         N         did          V             P
+            #         |                      |             |
+            #        HE                     go          inside
+            #
+            # (bad example but what if this what the case?
+            #
+
+
+            # Get the label of current_right_sibling before pop() current
+            current = nltk.tree.ParentedTree.convert(current)
+
+            # getattr(a, 'property', 'default value')
+            # t.right_sibling()
+            # getattr(t.right_sibling(), '.label()')
+            # if hasattr(t.right_sibling(), 'label'):
+            # if t.label() in MODAL_TAGS and hasattr(t.right_sibling(), 'label'):
+
+            # hasattr(t.right_sibling(), 'label')
+            # hasattr(t.right_sibling(), '_label')
+
+            if hasattr(t.right_sibling(), 'label'):
+                print("has motherfucking bitches!")
+
+            current_right_sibling = t.right_sibling().label()
+
+            # If both current (a past tense verb) and current's
+            # if the very next terminal is a verb, then t (current) is a past test verb
+            if current_right_sibling in MODAL_TAGS:
+
+                # Create new Tense node (pre-terminal T with terminal moodal past tense verb)
+                # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+                tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
+
+                # Save copy of the granparent's node - to get the index where to move the new Tense node
+                # TODO: I could probably use parent.parent() instead of grandpa - saving it might not be
+                # necessary since parent wasn't removed.
                 grandpa = parent.parent()
-                parent.pop(0)
+                # TODO: KEEP THIS OR NOT?
+                grandpa = nltk.tree.ParentedTree.convert(grandpa)
 
-                # to do:
-                tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+                # Get position just left of the right most child of grandparent (right-most-node should be a VP)
+                # So -1 for index of right-most-child-of grandparent, and then -1 to get the node left of that
+                index = len(grandpa) - 2
+
+                # Pop or remove current node
+                # parent.pop(0)
+                grandpa.pop(index)
+
+                # referesh
+                current = nltk.tree.ParentedTree.convert(current)
+
+                # Insert new Tense (T) Node into new position
                 #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-                grandpa.insert(1, tense)
+
+                #grandpa.insert(1, tense)
+
+                # TODO: Do I need this first to refresh
+                # index = len(grandpa) - 2
+                # grandpa = nltk.ParentedTree(parent.parent())
+
+                grandpa.insert(index, tense_node)
 
         for child in t:
-            self.promote_tense(child, modal_labels, new_label)
+            self.promote_tense(child)
+
 
     def promote_modals_to_tense(self, t):
         # VBN - Verb, past participle
         # VBP - Verb, non-3rd person singular present
         # VBZ
         ptree = nltk.tree.ParentedTree.convert(t)
-        #modal_tags = ["VBD", "MD"]
-        modal_tags = ["V"]
-        self.promote_tense(ptree, modal_tags, "T")
+        self.promote_tense(ptree)
         new_tree_str = str(ptree)
         new_tree = nltk.tree.Tree.fromstring(new_tree_str)
         return new_tree
@@ -202,6 +655,7 @@ class Tree(object):
 
                 # test t back to current before continuing to traverse.
                 t = current
+                current = nltk.tree.ParentedTree.convert(current)
 
         for child in t:
             self.collapse_duplicate_nodes(child, label)
@@ -244,6 +698,7 @@ class Tree(object):
         if t.label() in preterminal_tags:
             current = t
             parent = current.parent()
+
             phrase_label = f"{t.label()}P"
             if parent.label() != phrase_label:
                 parent_index = current.parent_index()
@@ -312,6 +767,12 @@ class Tree(object):
         except AttributeError:
             return
 
+        # NOTE: To access the left-child node    (object) of a tree node:  t[0]
+        # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
+        # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
+
+        # NOTE: To whoever designed nltk.tree: That's fucked
+
         if t.label() == 'CP':
             current = t
 
@@ -321,11 +782,6 @@ class Tree(object):
                 # (C Ø)  <- The empty set
                 empty_set_node = nltk.tree.Tree.fromstring("(C Ø)")
                 current.insert(0, empty_set_node)
-
-            # NOTE: To access the left-child node    (object) of a tree node:  t[0]
-            # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
-            # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
-            # NOTE: To whoever designed nltk.tree: That's fucked
 
             # Else, if there is more than one child node,
             # Then check it is not complement, replace it's label with C
@@ -339,16 +795,42 @@ class Tree(object):
         for child in t:
             self.add_complement(child)
 
+    # def parse_sentence(self, sentence):
+    #     tree = next(self.parser.raw_parse(sentence))
+    #
+    #     tree = self.collapse_duplicate(tree)
+    #     tree = self.convert_tree_labels(tree, tag_mapping)
+    #     tree = self.promote_modals_to_tense(tree)
+    #     #self.promote_tense(tree, modal_tags, "T")
+    #     tree = self.expand_phrase(tree)
+    #     self.add_complement(tree)
+    #
+    #     return tree[0]
+
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
         tree = self.collapse_duplicate(tree)
         tree = self.convert_tree_labels(tree, tag_mapping)
-        tree = self.promote_modals_to_tense(tree)
+
+        ###############
+        # self.write_to_file(tree, "XXXXXX")
+        ###############
+
+        # tree = self.promote_modals_to_tense(tree)
+        # #self.promote_tense(tree, modal_tags, "T")
+
+         # Convert to nltk.ParentedTree before promoting any past tense verbs
+        tree = nltk.ParentedTree.convert(tree)
+        self.promote_tense(tree)
+        # Change back to nltk.Tree after finishing tree transforms rquired by promoting test
+        tree = str(tree)
+
         tree = self.expand_phrase(tree)
         self.add_complement(tree)
 
         return tree[0]
+
 
     def parse_sentences(self, sentences):
         i = 0
