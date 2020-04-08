@@ -393,7 +393,6 @@ class Tree(object):
         for child in t:
             self.promote_tense(child)
 
-
     def promote_modals_to_tense(self, t):
         # VBN - Verb, past participle
         # VBP - Verb, non-3rd person singular present
