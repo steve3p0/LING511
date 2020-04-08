@@ -127,8 +127,8 @@ class Tree(object):
         self.daughters = daughters if daughters else []
         self.parser = parser
 
-    def __repr__(self):
-        return self.pretty()
+    # def __repr__(self):
+    #     return self.pretty()
 
     ############################################################################
     # magic methods for access, etc., all using self.daughters
@@ -373,33 +373,36 @@ class Tree(object):
         label = mapping.get(tree.label(), tree.label())
         return nltk.tree.Tree(label, children)
 
-    # def promote_tense(self, t, modal_labels, new_label):
+    #### VERSION 1 ########################################
+    # def promote_tense(self, t):
     #     try:
     #         t.label()
     #     except AttributeError:
     #         return
     #
-    #
-    #     if t.label() in modal_labels:
+    #     if t.label() in MODAL_TAGS:
     #         current = t
     #         parent = current.parent()
     #
     #         # label_child1 (current) is an only child
     #         label_child1 = t.label()
     #
-    #         label_child12 = t.right_sibling().label()
-    #         if label_child12 in modal_labels:
+    #
+    #
+    #         label_child2 = t.right_sibling().label()
+    #         if label_child2 in MODAL_TAGS:
     #             grandpa = parent.parent()
     #             parent.pop(0)
     #
     #             # to do:
-    #             tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
+    #             tense = nltk.tree.ParentedTree.fromstring(f"(TREXXXXXX {t[0]})")
     #             #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
     #             grandpa.insert(1, tense)
     #
     #     for child in t:
-    #         self.promote_tense(child, modal_labels, new_label)
+    #         self.promote_tense(child)
 
+    #### VERSION 2 ########################################
     # def promote_tense(self, t, new_label):
     #     try:
     #         t.label()
@@ -469,130 +472,54 @@ class Tree(object):
     #     for child in t:
     #         self.promote_tense(child, new_label)
 
-    # def promote_tense(self, t, modal_labels, new_label):
-    #     try:
-    #         t.label()
-    #     except AttributeError:
-    #         return
-    #
-    #     label_child1 = t.label()
-    #     if label_child1 in modal_labels:
-    #         current = t
-    #         parent = current.parent()
-    #
-    #         #label_child12 = t.right_sibling().label()
-    #         #if not t.right_sibling().label()
-    #         #if label_child12 in modal_labels:
-    #
-    #         try:
-    #             t.label()
-    #         except AttributeError:
-    #             # the right sibling is a tree
-    #             sibling_tree =  t.right_sibling()
-    #             if sibling_tree[0]
-    #
-    #             #return
-    #
-    #         grandpa = parent.parent()
-    #         parent.pop(0)
-    #
-    #         # to do:
-    #         tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
-    #         #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
-    #         grandpa.insert(1, tense)
-    #
-    #
-    #
-    #     for child in t:
-    #         self.promote_tense(child, modal_labels, new_label)
-
+    #### VERSION 3 ########################################
     def promote_tense(self, t):
         try:
             t.label()
         except AttributeError:
             return
 
-        # NOTE: To access the left-child node    (object) of a tree node:  t[0]
-        # NOTE: To access the left-child label    (str)   of a tree node:  t[0].label()
-        # NOTE: To access the left-child terminal (str)   of a tree node:  t[0][0]
-        # NOTE: To whoever designed nltk.tree: That's fucked
-
-        if t.label() in MODAL_TAGS:
+        # If both current (a past tense verb) and current's
+        # if the very next terminal is a verb, then t (current) is a past test verb
+        # TODO: change process_sentence to not call convert_tags so that you
+        # make sure right_sibling in a present tense ver
+        if (t.label() in MODAL_TAGS):
             current = t
             #parent = current.parent()
             parent = t.parent()
+            grandpa = parent.parent()
 
-            # Refresh all ParentedTree objects - this is a hack
-            # This function is sometimes called by methods that may or may refresh
-            # It fixes an issue with not being able to access sibling and parent nodes
-            # To read more: http://www.nltk.org/howto/tree.html
-            #parent = nltk.tree.ParentedTree.convert(parent)
-            #nltk.Tree.fromstring(str(parent.root())).pretty_print()
-
-            # TODO: Question:
-            # Is it possible to have a past tense verb buried in subtrees that gets
-            # elevated to more the generation above it?
-
-            # TODO: Question:
-            # Does a past tense verb (always) end up second from the right of a tense phrase (TP)
-            #
-
-            # TODO: What if parent has siblings to the right?
-            #
-            #                           TP
-            #           ________________|_____________________
-            #          |         T           VB             PP
-            #         |          |           |              |
-            #         N         did          V             P
-            #         |                      |             |
-            #        HE                     go          inside
-            #
-            # (bad example but what if this what the case?
-            #
-
-
-            # Get the label of current_right_sibling before pop() current
+            # Refresh all trees and subtrees in ParentedTree
             current = nltk.tree.ParentedTree.convert(current)
 
-            # getattr(a, 'property', 'default value')
-            # t.right_sibling()
-            # getattr(t.right_sibling(), '.label()')
-            # if hasattr(t.right_sibling(), 'label'):
-            # if t.label() in MODAL_TAGS and hasattr(t.right_sibling(), 'label'):
+            right_sibling = getattr(t.right_sibling(), 'label', lambda: None)()
+            #right_sibling = nltk.tree.ParentedTree.convert(right_sibling)
 
-            # hasattr(t.right_sibling(), 'label')
-            # hasattr(t.right_sibling(), '_label')
-
-            if hasattr(t.right_sibling(), 'label'):
-                print("has motherfucking bitches!")
-
-            current_right_sibling = t.right_sibling().label()
-
-            # If both current (a past tense verb) and current's
-            # if the very next terminal is a verb, then t (current) is a past test verb
-            if current_right_sibling in MODAL_TAGS:
-
+            if right_sibling in MODAL_TAGS:
+                #right_sibling = getattr(t.right_sibling(), 'label', None)
                 # Create new Tense node (pre-terminal T with terminal moodal past tense verb)
                 # tense = nltk.tree.ParentedTree.fromstring(f"({new_label} {t[0]})")
                 tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
+                tense_node = nltk.tree.ParentedTree.convert(tense_node)
 
                 # Save copy of the granparent's node - to get the index where to move the new Tense node
                 # TODO: I could probably use parent.parent() instead of grandpa - saving it might not be
                 # necessary since parent wasn't removed.
-                grandpa = parent.parent()
-                # TODO: KEEP THIS OR NOT?
-                grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                # parent = parent()
+                # # TODO: KEEP THIS OR NOT?
+                parent = nltk.tree.ParentedTree.convert(parent)
 
                 # Get position just left of the right most child of grandparent (right-most-node should be a VP)
                 # So -1 for index of right-most-child-of grandparent, and then -1 to get the node left of that
-                index = len(grandpa) - 2
+                index = len(parent) - 2
 
                 # Pop or remove current node
                 # parent.pop(0)
-                grandpa.pop(index)
-
+                #parent = nltk.tree.ParentedTree.convert(parent)
+                #parent.pop(index)
+                parent.remove(current)
                 # referesh
-                current = nltk.tree.ParentedTree.convert(current)
+                parent = nltk.tree.ParentedTree.convert(parent)
 
                 # Insert new Tense (T) Node into new position
                 #tense = nltk.tree.ParentedTree.convert(nltk.tree.Tree.fromstring(f"({new_label} {t[0]})"))
@@ -601,9 +528,17 @@ class Tree(object):
 
                 # TODO: Do I need this first to refresh
                 # index = len(grandpa) - 2
-                # grandpa = nltk.ParentedTree(parent.parent())
+                current = nltk.tree.ParentedTree.convert(current)
+
+                # grandpa = parent.parent()
+                grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                index = len(grandpa) - 1
 
                 grandpa.insert(index, tense_node)
+                current = nltk.tree.ParentedTree.convert(current)
+                print("T moved")
+                # grandpa = nltk.ParentedTree(parent.parent())
+                t = nltk.tree.ParentedTree.convert(t)
 
         for child in t:
             self.promote_tense(child)
@@ -824,10 +759,10 @@ class Tree(object):
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
         # Change back to nltk.Tree after finishing tree transforms rquired by promoting test
-        tree = str(tree)
+        #tree = str(tree)
 
-        tree = self.expand_phrase(tree)
-        self.add_complement(tree)
+        #tree = self.expand_phrase(tree)
+        #self.add_complement(tree)
 
         return tree[0]
 
