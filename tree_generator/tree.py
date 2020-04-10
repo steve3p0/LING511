@@ -487,7 +487,7 @@ class Tree(object):
         try:
             t.label()
         except AttributeError:
-            print(t)
+            #print(t)
             return
 
         # NOTE: To access the left-child node    (object) of a tree node:  t[0]
@@ -608,8 +608,8 @@ class Tree(object):
         # self.write_to_file(tree, "XXXXXX")
         ###############
 
-        print(f"BEFORE PROMOTE: ********************************")
-        nltk.Tree.pretty_print(tree)
+        # print(f"BEFORE PROMOTE: ********************************")
+        # nltk.Tree.pretty_print(tree)
 
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
