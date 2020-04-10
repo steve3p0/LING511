@@ -379,22 +379,60 @@ class Tree(object):
         try:
             t.label()
         except AttributeError:
-            #print(t)
+            # print(t)
             return
 
         if t.label() in MODAL_TAGS:
             current = t
             parent = current.parent()
-            right_sibling = getattr(current.right_sibling(), 'label', lambda: None)()
+            tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
 
-            if right_sibling in MODAL_TAGS:
-                tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
+            right1_sibling = getattr(current.right_sibling(), 'label', lambda: None)()
+            right2_sibling = getattr(current.right_sibling().right_sibling(), 'label', lambda: None)()
+
+            if (right1_sibling in MODAL_TAGS) or \
+                    (right1_sibling == "Adv" and right2_sibling in MODAL_TAGS):
                 parent.remove(current)
                 grandpa = parent.parent()
                 grandpa.insert(len(grandpa) - 1, tense_node)
 
         for child in t:
             self.promote_tense(child)
+
+    # def promote_tense(self, t):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         print(t)
+    #         return
+    #
+    #     if t.label() in MODAL_TAGS:
+    #         current = t
+    #         parent = current.parent()
+    #         tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
+    #
+    #         right1_sibling = getattr(current.right_sibling(), 'label', lambda: None)()
+    #
+    #         if (right1_sibling in MODAL_TAGS):
+    #             parent.remove(current)
+    #             grandpa = parent.parent()
+    #             grandpa.insert(len(grandpa) - 1, tense_node)
+    #         else:
+    #             try:
+    #                 right2_sibling = getattr(current.right_sibling().right_sibling(), 'label', lambda: None)()
+    #
+    #                 if (right1_sibling in MODAL_TAGS) and \
+    #                         (right1_sibling == "Adv" and right2_sibling in MODAL_TAGS):
+    #                     parent.remove(current)
+    #                     grandpa = parent.parent()
+    #                     grandpa.insert(len(grandpa) - 1, tense_node)
+    #
+    #             except AttributeError:
+    #                 print("Fuck off")
+    #                 #return
+    #
+    #     for child in t:
+    #         self.promote_tense(child)
 
     def promote_modals_to_tense(self, t):
         # VBN - Verb, past participle
@@ -410,7 +448,7 @@ class Tree(object):
         try:
             t.label()
         except AttributeError:
-            print(t)
+            #print(t)
             return
 
         if t.label() == label:
