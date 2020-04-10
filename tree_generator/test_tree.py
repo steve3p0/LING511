@@ -228,7 +228,7 @@ class TestTree(unittest.TestCase):
         self.assertEqual(actual_tree, expected_tree)
 
 
-class TestTreeIntegration(unittest.TestCase):
+class TestTenTreesADay3(unittest.TestCase):
     @staticmethod
     def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False):
         stanford_parser = stanford.StanfordParser(model_path=model_path)
@@ -243,69 +243,37 @@ class TestTreeIntegration(unittest.TestCase):
         # tree.write_to_file(actual_tree, "tree_expected_XX")
 
         if debug:
-            print("#########################################################################################")
+            print("\n#########################################################################################")
             print(f"Test Sentence {testid}:\n {sentence}:")
 
-            print(f"Expected String: \n{str(expected_tree)}\n")
-            print(f"Actual String: \n{str(actual_tree)}\n")
+            # print(f"Expected String: \n{str(expected_tree)}\n")
+            # print(f"Actual String: \n{str(actual_tree)}\n")
 
             tree.write_to_file(expected_tree, f"tree_expected_{testid}")
             tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
             ohsu_tree = Tree.from_string(expected_tree_str)
             expect_pretty_str = ohsu_tree.pretty()
+            # print(f"{testid}) EXPECTED UGLY: ********************************")
+            # print(expect_pretty_str)
+
             print(f"{testid}) EXPECTED PRETTY: ********************************")
-            print(expect_pretty_str)
+            nltk_tree.pretty_print(expected_tree)
 
             ohsu_tree = Tree.from_string(actual_tree_str)
             actual_pretty_str = ohsu_tree.pretty()
-            print(f"{testid}) ACTUAL PRETTY: **********************************")
-            print(actual_pretty_str)
+            # print(f"{testid}) ACTUAL UGLY: **********************************")
+            # print(actual_pretty_str)
+
+            print(f"{testid}) ACTUAL PRETTY: ********************************")
+            nltk_tree.pretty_print(actual_tree)
+
+
 
         return expected_tree, actual_tree
 
     @unittest.skip("")
     def test_productions_demo(self):
-        # s = inspect.cleandoc("""
-        #     (TOP
-        #         (NP-SBJ
-        #             (DT these)
-        #             (NNS funds)
-        #         )
-        #         (ADVP-TMP
-        #             (RB now)
-        #         )
-        #         (VP
-        #             (VBP account)
-        #             (PP-CLR
-        #                 (IN for)
-        #                 (NP
-        #                     (NP
-        #                         (NP
-        #                             (QP
-        #                                 (JJ several)
-        #                                 (NNS billions)
-        #                             )
-        #                         )
-        #                         (PP
-        #                             (IN of)
-        #                             (NP
-        #                                 (NNS dollars)
-        #                             )
-        #                         )
-        #                     )
-        #                     (PP
-        #                         (IN in)
-        #                         (NP
-        #                             (NNS assets)
-        #                         )
-        #                     )
-        #                 )
-        #             )
-        #         )
-        #         (. .)
-        #     )""")
-
         s = "(TP (NP (D The) (N dog)) (VP (V chased) (NP (D the) (N cat))))"
         t_before = Tree.from_string(s)
 
@@ -387,6 +355,123 @@ class TestTreeIntegration(unittest.TestCase):
 
     def test_ten_trees_a_day_three_10(self):
         sentence = "He thought that other places must be more interesting"
+        expected_parse_str = \
+            "(TP (NP (N He)) (VP (V thought) (CP (C that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (AdvP (Adv more)) (AdjP (Adj interesting))))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+
+class TestTenTreesADay4(unittest.TestCase):
+    @staticmethod
+    def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False):
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+
+        tree = Tree(parser=stanford_parser)
+        expected_tree = nltk_tree.fromstring(expected_tree_str)
+
+        actual_tree = tree.parse_sentence(sentence)
+        actual_tree_str = inspect.cleandoc(str(actual_tree)).replace('\n', '').replace('\r', '').replace('  ', ' ')
+
+        # tree.write_to_file(expected_tree, "tree_expected_XX")
+        # tree.write_to_file(actual_tree, "tree_expected_XX")
+
+        if debug:
+            print("#########################################################################################")
+            print(f"Test Sentence {testid}:\n {sentence}:")
+
+            print(f"Expected String: \n{str(expected_tree)}\n")
+            print(f"Actual String: \n{str(actual_tree)}\n")
+
+            tree.write_to_file(expected_tree, f"tree_expected_{testid}")
+            tree.write_to_file(actual_tree, f"tree_actual_{testid}")
+
+            ohsu_tree = Tree.from_string(expected_tree_str)
+            expect_pretty_str = ohsu_tree.pretty()
+            print(f"{testid}) EXPECTED PRETTY: ********************************")
+            print(expect_pretty_str)
+
+            ohsu_tree = Tree.from_string(actual_tree_str)
+            actual_pretty_str = ohsu_tree.pretty()
+            print(f"{testid}) ACTUAL PRETTY: **********************************")
+            print(actual_pretty_str)
+
+        return expected_tree, actual_tree
+
+    def test_ten_trees_a_day_four_01(self):
+        sentence = "The herd slowly came to a stop"
+        expected_parse_str = \
+            "(TP (NP (D The) (N animals)) (T did) (VP (AdvP (Adv not)) (V think) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V eat) (NP (N them)))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 1, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_02(self):
+        sentence = "The mouse peeked her head out of the hole"
+        expected_parse_str = \
+            "(TP (NP (N They)) (VP (V were) (AdjP (Adj afraid) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V trample) (NP (N them))))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 2, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_03(self):
+        sentence = "She saw a young buffalo nearby"
+        expected_parse_str = \
+            "(TP (NP (D The) (N buffalo)) (T were) (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 3, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_04(self):
+        sentence = "The buffalo looked too young to be dangerous"
+        expected_parse_str = \
+            "(TP (NP (D Those) (N buffalo)) (VP (V were) (AdjP (AdjP (Adj large)) (Conj and) (AdjP (Adj lumbering)))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 4, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_05(self):
+        sentence = "The mouse began to talk to the young buffalo"
+        expected_parse_str = \
+            "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (V heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 5, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_06(self):
+        sentence = "The mouse asked about life on the plains"
+        expected_parse_str = \
+            "(TP (NP (D One) (AdjP (Adj young)) (N buffalo)) (VP (V trotted) (AdvP (Adv slowly)) (PP (P behind) (NP (D the) (N herd)))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 6, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_07(self):
+        sentence = "The mouse had lived in the city before she had moved to the country"
+        expected_parse_str = \
+            "(TP (NP (N He)) (T was) (VP (V smelling) (NP (D the) (AdjP (Adj fresh)) (N grass))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 7, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_08(self):
+        sentence = "The mouse and the buffalo talked for a while"
+        expected_parse_str = \
+            "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (C whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 8, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_09(self):
+        sentence = "She could tell the buffalo about many other places"
+        expected_parse_str = \
+            "(TP (NP (N He)) (VP (V was) (AdjP (Adj tired) (PP (P of) (NP (D the) (AdjP (Adj dry)) (AdjP (Adj grassy)) (N plains))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 9, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_ten_trees_a_day_four_10(self):
+        sentence = "The buffalo would have listened to her for hours"
         expected_parse_str = \
             "(TP (NP (N He)) (VP (V thought) (CP (C that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (AdvP (Adv more)) (AdjP (Adj interesting))))))))"
 

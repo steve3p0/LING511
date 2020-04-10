@@ -75,6 +75,7 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     # Determiners
     'DT': 'D',
     'CD': 'D',
+    'PRP$': 'D',
     # Nouns
     'NN': 'N',
     'NNS': 'N',
@@ -101,6 +102,7 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     # 1) IF MD IS tense, then it needs to be moved to and a transfer must occur
     #    look at #8 from 10TAD3
     'MD': 'V',
+
 
     # 2) JJ : AdjP -> Adj
     # 3) Complementizer Phrases
@@ -377,6 +379,7 @@ class Tree(object):
         try:
             t.label()
         except AttributeError:
+            #print(t)
             return
 
         if t.label() in MODAL_TAGS:
@@ -407,6 +410,7 @@ class Tree(object):
         try:
             t.label()
         except AttributeError:
+            print(t)
             return
 
         if t.label() == label:
@@ -416,18 +420,46 @@ class Tree(object):
                 current = t
                 parent = current.parent()
 
-                # Save left sibling of the current node before we pop it!
-                # We will make it the left child of the current node
-                p_left_child = current.left_sibling()
-
-                # We are going to pop the left sibling move it down to the left most
-                parent.pop(0)
+                child_count = len(parent)
 
                 # You have to refresh grandparent after parent did a pop
                 grandpa = parent.parent()
 
-                # Now insert the popped off left_child into the left-most child spot of current node
-                current.insert(0, p_left_child)
+                if len(parent) > 2:
+                    for i in (0, len(parent) - 2):
+
+                        # Save left sibling of the current node before we pop it!
+                        # We will make it the left child of the current node
+                        # p_left_child = current.left_sibling()
+                        # p_left_child = nltk.tree.ParentedTree.convert(p_left_child)
+                        oldest = parent[0]
+                        oldest = nltk.tree.ParentedTree.convert(oldest)
+
+                        # We are going to pop the left sibling move it down to the left most
+                        #parent.pop(0)
+                        #parent.pop(i)
+                        parent.remove(oldest)
+                        parent = nltk.tree.ParentedTree.convert(parent)
+
+                        # Now insert the popped off left_child into the left-most child spot of current node
+                        #current.insert(0, p_left_child)
+                        #current.insert(i, oldest)
+                        length = len(current) - 2
+                        current.insert(length, oldest)
+                        current = nltk.tree.ParentedTree.convert(current)
+                else:
+                    # Save left sibling of the current node before we pop it!
+                    # We will make it the left child of the current node
+                    p_left_child = current.left_sibling()
+
+                    # We are going to pop the left sibling move it down to the left most
+                    parent.pop(0)
+
+                    # You have to refresh grandparent after parent did a pop
+                    grandpa = parent.parent()
+
+                    # Now insert the popped off left_child into the left-most child spot of current node
+                    current.insert(0, p_left_child)
 
                 # Now Pop off the right most child of grandpa (which is the current node)
                 grandpa.pop(len(grandpa) - 1)
@@ -439,34 +471,9 @@ class Tree(object):
 
                 # test t back to current before continuing to traverse.
                 t = current
-                current = nltk.tree.ParentedTree.convert(current)
 
         for child in t:
             self.collapse_duplicate_nodes(child, label)
-
-    # def expand_phrase_nodes(self, t, preterminal_tags):
-    #     try:
-    #         t.label()
-    #     except AttributeError:
-    #         return
-    #
-    #     if t.label() in preterminal_tags:
-    #         current = t
-    #         parent = current.parent()
-    #         phrase_label = f"{t.label()}P"
-    #         if parent.label() != phrase_label:
-    #             parent_index = current.parent_index()
-    #             new_child = nltk.tree.ParentedTree.convert(current)
-    #
-    #             new_parent = nltk.tree.ParentedTree(phrase_label, [new_child])
-    #             parent.remove(current)
-    #             parent.insert(parent_index, new_parent)
-    #
-    #             # test t back to current before continuing to traverse.
-    #             t = new_child
-    #
-    #     for child in t:
-    #         self.expand_phrase_nodes(child, preterminal_tags)
 
     def expand_phrase_nodes(self, t, preterminal_tags):
         try:
@@ -582,6 +589,9 @@ class Tree(object):
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
+        print(f"STANFORD PRETTY: ********************************")
+        nltk.Tree.pretty_print(tree)
+
         tree = self.collapse_duplicate(tree)
         tree = self.convert_tree_labels(tree, tag_mapping)
 
@@ -597,7 +607,6 @@ class Tree(object):
         self.add_complement(tree)
 
         return tree[0]
-
 
     def parse_sentences(self, sentences):
         i = 0
