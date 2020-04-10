@@ -487,6 +487,7 @@ class Tree(object):
         try:
             t.label()
         except AttributeError:
+            print(t)
             return
 
         # NOTE: To access the left-child node    (object) of a tree node:  t[0]
@@ -512,16 +513,16 @@ class Tree(object):
 
             # If parent is a Phrase of the same tag type, but is not preterminal (it has more than 1 child nodes)....
             # Replace the current node with a preterminal phrase and move the current node as it's only child
-            elif parent.label() == phrase_label and len(parent) > 1:
-                parent_index = current.parent_index()
-                new_child = nltk.tree.ParentedTree.convert(current)
-
-                new_parent = nltk.tree.ParentedTree(phrase_label, [new_child])
-                parent.remove(current)
-                parent.insert(parent_index, new_parent)
-
-                # test t back to current before continuing to traverse.
-                t = new_child
+            # elif parent.label() == phrase_label and len(parent) > 1:
+            #     parent_index = current.parent_index()
+            #     new_child = nltk.tree.ParentedTree.convert(current)
+            #
+            #     new_parent = nltk.tree.ParentedTree(phrase_label, [new_child])
+            #     parent.remove(current)
+            #     parent.insert(parent_index, new_parent)
+            #
+            #     # test t back to current before continuing to traverse.
+            #     t = new_child
 
         for child in t:
             self.expand_phrase_nodes(child, preterminal_tags)
@@ -597,8 +598,8 @@ class Tree(object):
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
-        print(f"STANFORD PRETTY: ********************************")
-        nltk.Tree.pretty_print(tree)
+        # print(f"STANFORD: ********************************")
+        # nltk.Tree.pretty_print(tree)
 
         tree = self.collapse_duplicate(tree)
         tree = self.convert_tree_labels(tree, tag_mapping)
@@ -606,6 +607,9 @@ class Tree(object):
         ###############
         # self.write_to_file(tree, "XXXXXX")
         ###############
+
+        print(f"BEFORE PROMOTE: ********************************")
+        nltk.Tree.pretty_print(tree)
 
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)

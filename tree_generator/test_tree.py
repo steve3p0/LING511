@@ -246,29 +246,17 @@ class TestTenTreesADay3(unittest.TestCase):
             print("\n#########################################################################################")
             print(f"Test Sentence {testid}:\n {sentence}:")
 
-            # print(f"Expected String: \n{str(expected_tree)}\n")
             # print(f"Actual String: \n{str(actual_tree)}\n")
+            # print(f"Expected String: \n{str(expected_tree)}\n")
 
             tree.write_to_file(expected_tree, f"tree_expected_{testid}")
             tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
-            ohsu_tree = Tree.from_string(expected_tree_str)
-            expect_pretty_str = ohsu_tree.pretty()
-            # print(f"{testid}) EXPECTED UGLY: ********************************")
-            # print(expect_pretty_str)
-
-            print(f"{testid}) EXPECTED PRETTY: ********************************")
-            nltk_tree.pretty_print(expected_tree)
-
-            ohsu_tree = Tree.from_string(actual_tree_str)
-            actual_pretty_str = ohsu_tree.pretty()
-            # print(f"{testid}) ACTUAL UGLY: **********************************")
-            # print(actual_pretty_str)
-
-            print(f"{testid}) ACTUAL PRETTY: ********************************")
+            print(f"{testid}) ACTUAL: ********************************")
             nltk_tree.pretty_print(actual_tree)
 
-
+            print(f"{testid}) EXPECTED: ********************************")
+            nltk_tree.pretty_print(expected_tree)
 
         return expected_tree, actual_tree
 
@@ -357,6 +345,30 @@ class TestTenTreesADay3(unittest.TestCase):
         sentence = "He thought that other places must be more interesting"
         expected_parse_str = \
             "(TP (NP (N He)) (VP (V thought) (CP (C that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (AdvP (Adv more)) (AdjP (Adj interesting))))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_book23_10(self):
+        sentence = "He thought that other places must be more interesting"
+        expected_parse_str = \
+            "(TP (NP (N He)) (VP (V thought) (CP (C that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (AdvP (Adv more)) (AdjP (Adj interesting))))))))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_book23_23a(self):
+        sentence = "the big yellow book"
+        expected_parse_str = \
+            "(FRAG (NP (D the) (AdjP (Adj big)) (AdjP (Adj yellow)) (N book)))"
+
+        expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_book23_23b(self):
+        sentence = "the very yellow book"
+        expected_parse_str = \
+            "(FRAG (NP (D the) (AdjP (AdvP (Adv very)) (Adj yellow)) (N book)))"
 
         expected_tree, actual_tree = self.get_expected_actual_trees(sentence, expected_parse_str, 10, True)
         self.assertEqual(actual_tree, expected_tree)
