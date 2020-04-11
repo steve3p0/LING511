@@ -16,6 +16,8 @@ from tree import Tree
 
 model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
+EMPTY_SET = "∅"
+
 def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False):
     stanford_parser = stanford.StanfordParser(model_path=model_path)
 
@@ -32,17 +34,20 @@ def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False):
         print("\n#########################################################################################")
         print(f"Test Sentence {testid}:\n {sentence}:")
 
-        # print(f"Actual String: \n{str(actual_tree)}\n")
-        # print(f"Expected String: \n{str(expected_tree)}\n")
-
-        tree.write_to_file(expected_tree, f"tree_expected_{testid}")
-        tree.write_to_file(actual_tree, f"tree_actual_{testid}")
+        # Write output to .png file
+        # tree.write_to_file(expected_tree, f"tree_expected_{testid}")
+        # tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
         print(f"{testid}) ACTUAL: ********************************")
         nltk_tree.pretty_print(actual_tree)
-
         print(f"{testid}) EXPECTED: ********************************")
         nltk_tree.pretty_print(expected_tree)
+
+        print(f"{testid}) ACTUAL: ********************************")
+
+        print(f"Actual String: \n{actual_tree_str}\n")
+        print(f"{testid}) EXPECTED: ********************************")
+        print(f"Expected String: \n{str(expected_tree)}\n")
 
     return expected_tree, actual_tree
 
@@ -373,7 +378,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_01(self):
         sentence = "The herd slowly came to a stop"
         expected_parse_str = \
-            "(TP (NP (D The) (N animals)) (T did) (VP (AdvP (Adv not)) (V think) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V eat) (NP (N them)))))))"
+            "(TP (NP (D The) (N herd)) (VP (AdvP (Adv slowly)) (V came) (PP (P to) (NP (D a) (N stop)))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 1, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -381,7 +386,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_02(self):
         sentence = "The mouse peeked her head out of the hole"
         expected_parse_str = \
-            "(TP (NP (N They)) (VP (V were) (AdjP (Adj afraid) (CP (C Ø) (TP (NP (D the) (N buffalo)) (T would) (VP (V trample) (NP (N them))))))))"
+            "(TP(NP (D The) (N mouse))(VP (V peeked) (NP (D her) (N head)) (PRT (RP out)) (PP (P of) (NP (D the) (N hole)))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 2, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -389,7 +394,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_03(self):
         sentence = "She saw a young buffalo nearby"
         expected_parse_str = \
-            "(TP (NP (D The) (N buffalo)) (T were) (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass))))"
+            "(TP(NP (N She))(VP (V saw) (NP (D a) (AdjP (Adj young)) (N buffalo)) (AdvP (Adv nearby))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -397,7 +402,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_04(self):
         sentence = "The buffalo looked too young to be dangerous"
         expected_parse_str = \
-            "(TP (NP (D Those) (N buffalo)) (VP (V were) (AdjP (AdjP (Adj large)) (Conj and) (AdjP (Adj lumbering)))))"
+            f"(TP(NP (D The) (N buffalo))(VP (V looked) (AdjP  (AdvP (Deg too))  (Adj young)  (TP (NP {EMPTY_SET}) (VP (P to) (V be) (AdjP (Adj dangerous)))))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -405,7 +410,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_05(self):
         sentence = "The mouse began to talk to the young buffalo"
         expected_parse_str = \
-            "(TP (NP (NP (D The) (N herd)) (CP (C that) (TP (NP (D the) (N animals)) (T had) (VP (V heard))))) (VP (V caused) (NP (AdjP (Adj considerable)) (N alarm))))"
+            f"(TP(NP (D The) (N mouse)) (VP (V began) (TP (NP {EMPTY_SET}) (P to) (VP (V talk) (PP (P to) (NP (D the) (AdjP (Adj young)) (N buffalo)))))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -413,7 +418,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_06(self):
         sentence = "The mouse asked about life on the plains"
         expected_parse_str = \
-            "(TP (NP (D One) (AdjP (Adj young)) (N buffalo)) (VP (V trotted) (AdvP (Adv slowly)) (PP (P behind) (NP (D the) (N herd)))))"
+            "(TP(NP (D The) (N mouse))(VP (V asked) (PP (P about) (NP (N life))) (PP (P on) (NP (D the) (N plains)))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -421,7 +426,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_07(self):
         sentence = "The mouse had lived in the city before she had moved to the country"
         expected_parse_str = \
-            "(TP (NP (N He)) (T was) (VP (V smelling) (NP (D the) (AdjP (Adj fresh)) (N grass))))"
+            "(TP(NP (D The) (N mouse))(T had)(VP (V lived) (PP (P in) (NP (D the) (N city))) (CP  (C before)  (TP   (NP (N she))   (T had)   (VP (V moved) (PP (P to) (NP (D the) (N country))))))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -429,7 +434,7 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_08(self):
         sentence = "The mouse and the buffalo talked for a while"
         expected_parse_str = \
-            "(TP (NP (D This) (N buffalo)) (T was) (VP (V wondering) (CP (C whether) (TP (NP (N he)) (T would) (VP (V find) (NP (D any) (N adventures)))))))"
+            "(TP(NP (NP (D The) (N mouse)) (Conj and) (NP (D the) (N buffalo)))(VP (V talked) (PP (P for) (NP (D a) (N while)))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True)
         self.assertEqual(actual_tree, expected_tree)
@@ -437,15 +442,25 @@ class TestTenTreesADay4(unittest.TestCase):
     def test_ten_trees_a_day_four_09(self):
         sentence = "She could tell the buffalo about many other places"
         expected_parse_str = \
-            "(TP (NP (N He)) (VP (V was) (AdjP (Adj tired) (PP (P of) (NP (D the) (AdjP (Adj dry)) (AdjP (Adj grassy)) (N plains))))))"
+            "(TP(NP (N She))(T could)(VP (V tell) (NP  (NP (D the) (N buffalo))  (PP   (P about)   (NP (AdjP (Adj many)) (AdjP (Adj other)) (N places))))))"
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_ten_trees_a_day_four_10(self):
         sentence = "The buffalo would have listened to her for hours"
-        expected_parse_str = \
-            "(TP (NP (N He)) (VP (V thought) (CP (C that) (TP (NP (AdjP (Adj other)) (N places)) (T must) (VP (V be) (AdjP (AdvP (Adv more)) (AdjP (Adj interesting))))))))"
+        expected_parse_str = inspect.cleandoc("""
+            (TP 
+                (NP (D The) (N buffalo)) 
+                (T would) 
+                (VP (V have) 
+                    (VP 
+                        (V listened) 
+                        (PP (P to) (NP (N her))) 
+                        (PP (P for) (NP (N hours)))
+                    )
+                )
+            )""")
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True)
         self.assertEqual(actual_tree, expected_tree)

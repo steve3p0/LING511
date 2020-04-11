@@ -64,6 +64,7 @@ CNF_RIGHT_DELIMITER = '>'
 # MODAL_TAGS = ["VBD", "MD"]
 MODAL_TAGS = ["V"]
 TENSE_TAG = 'T'
+EMPTY_SET = "∅"
 
 # Reverse dictionary lookup
 # keys = [key for key, value in dict_obj.items() if value == 'value']
@@ -96,6 +97,7 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     'RBR': 'Adv',
     # Prepositions
     'IN': 'P',
+    'TO': 'P',
     #'IN': 'C',  # sometimes IN is C (complement)?
 
     # Modal issues:
@@ -580,8 +582,9 @@ class Tree(object):
             # Then it is missing it's complement, therefore, INSERT AN EMPTY SET CLAUSE
             if len(current) == 1:
                 # (C Ø)  <- The empty set
-                empty_set_node = nltk.tree.Tree.fromstring("(C Ø)")
+                empty_set_node = nltk.tree.Tree.fromstring(F"(C {EMPTY_SET})")
                 current.insert(0, empty_set_node)
+
 
             # Else, if there is more than one child node,
             # Then check it is not complement, replace it's label with C
@@ -598,8 +601,8 @@ class Tree(object):
     def parse_sentence(self, sentence):
         tree = next(self.parser.raw_parse(sentence))
 
-        # print(f"STANFORD: ********************************")
-        # nltk.Tree.pretty_print(tree)
+        print(f"STANFORD: ********************************")
+        nltk.Tree.pretty_print(tree)
 
         tree = self.collapse_duplicate(tree)
         tree = self.convert_tree_labels(tree, tag_mapping)
