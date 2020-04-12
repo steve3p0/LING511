@@ -377,6 +377,26 @@ class Tree(object):
         label = mapping.get(tree.label(), tree.label())
         return nltk.tree.Tree(label, children)
 
+    def remove_duplicates(self, t, parent):
+        if len(t) == 1:
+            #only_child = getattr(t[0], 'label', lambda: None)()
+            only_child = t[0]
+            only_child = nltk.tree.ParentedTree.convert(only_child)
+            if only_child.label() == t.label():
+                parent.remove(t)
+                parent.insert(len(parent), only_child)
+                parent = nltk.tree.ParentedTree.convert(parent)
+                return parent
+
+
+        # if len(t) == 1:
+        #     #only_child = getattr(t[0], 'label', lambda: None)()
+        #     only_child = t[0]
+        #     if only_child.label() == t.label():
+        #         grandpa = t.parent()
+        #         grandpa.insert(0, only_child)
+        #         grandpa.remove(t)
+
     def promote_tense(self, t):
         try:
             t.label()
@@ -389,22 +409,37 @@ class Tree(object):
             parent = current.parent()
             tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
 
-            right1_sibling = getattr(current.right_sibling(), 'label', lambda: None)()
-
-            if (right1_sibling in MODAL_TAGS):
+            next_pt = self.next_preterminal(t.parent()[1])
+            if (next_pt.label() in MODAL_TAGS):
                 parent.remove(current)
+                #parent = nltk.tree.ParentedTree.convert(parent)
                 grandpa = parent.parent()
                 grandpa.insert(len(grandpa) - 1, tense_node)
-            elif right1_sibling is not None:
-                right2_sibling = getattr(current.right_sibling().right_sibling(), 'label', lambda: None)()
-
-                if (right1_sibling == "Adv" and right2_sibling in MODAL_TAGS):
-                    parent.remove(current)
-                    grandpa = parent.parent()
-                    grandpa.insert(len(grandpa) - 1, tense_node)
+                #grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                parent = nltk.tree.ParentedTree.convert(parent)
+                grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                parent = self.remove_duplicates(parent, grandpa)
+                parent = nltk.tree.ParentedTree.convert(parent)
+                grandpa = nltk.tree.ParentedTree.convert(grandpa)
 
         for child in t:
             self.promote_tense(child)
+
+    def next_preterminal(self, t):
+        while True:
+            if type(t[0]) != str:
+                t = t[0]
+            else:
+                return t
+
+    def traverse_tree_words(self, t):
+        # print("tree:", tree)
+        for subtree in t:
+            if type(subtree) == nltk.tree.Tree:
+                #assert isinstance(subtree, object)
+                self.traverse_tree_words(subtree)
+            else:
+                print(subtree, end=" ")
 
     def promote_modals_to_tense(self, t):
         # VBN - Verb, past participle
@@ -603,8 +638,12 @@ class Tree(object):
 
         print(f"STANFORD: ********************************")
         nltk.Tree.pretty_print(tree)
+        print(str(tree))
 
-        tree = self.collapse_duplicate(tree)
+        #tree = self.collapse_duplicate(tree)
+        # print(f"COLLAPSE TREE: ********************************")
+        # nltk.Tree.pretty_print(tree)
+
         tree = self.convert_tree_labels(tree, tag_mapping)
 
         ###############
@@ -616,6 +655,9 @@ class Tree(object):
 
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
+        tree = nltk.ParentedTree.convert(tree)
+
+        #tree = self.collapse_duplicate(tree)
         tree = nltk.Tree.convert(tree)
 
         tree = self.expand_phrase(tree)

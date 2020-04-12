@@ -1,3 +1,4 @@
+import nltk
 import nose
 import unittest
 from nltk.parse import stanford
@@ -53,6 +54,71 @@ def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False):
 
 
 class TestTree(unittest.TestCase):
+
+    def test_next_preterminal(self):
+        tree_str = inspect.cleandoc("""
+        (S
+            (NP 
+                (DT The) 
+                (NN buffalo))
+            (VP 
+                (VBD were) 
+                (VP 
+                    (VBG pursuing) 
+                    (NP 
+                        (JJ fresh) 
+                        (NN grass)
+                    )
+                )
+            )
+        )""")
+
+        t = nltk_tree.fromstring(tree_str)
+        t = nltk.tree.ParentedTree.convert(t)
+        vbd = t[1][0]
+        assert(vbd.label() == "VBD")
+
+        tree = Tree()
+        #vbg1 = None
+        vbg = tree.next_preterminal(vbd.parent()[1])
+
+        assert(vbg.label() == "VBG")
+
+    def test_traverse_tree(self):
+        tree_str = inspect.cleandoc("""
+        (VP (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass)))))""")
+
+        t = nltk_tree.fromstring(tree_str)
+
+        tree = Tree()
+        tree.traverse_tree_words(t)
+
+    def test_traverse_tree(self):
+        tree_str = inspect.cleandoc("""
+        (ROOT
+          (S
+            (NP (DT The) (NN buffalo))
+            (VP (VBD were) (VP (VBG pursuing) (NP (JJ fresh) (NN grass))))))""")
+
+        t = nltk_tree.fromstring(tree_str)
+
+        tree = Tree()
+        tree.traverse_tree_words(t)
+
+    # def test_traverse_tree_string(self):
+    #     tree_str = inspect.cleandoc("""
+    #     (ROOT
+    #       (S
+    #         (NP (DT The) (NN buffalo))
+    #         (VP (VBD were) (VP (VBG pursuing) (NP (JJ fresh) (NN grass))))))""")
+    #
+    #     t = nltk_tree.fromstring(tree_str)
+    #
+    #     tree = Tree()
+    #     w = ""
+    #     tree.traverse_tree_words(t, w)
+    #     print(f"sentence: {w}")
+
     def test_tree_to_string(self):
         self.fail()
 
