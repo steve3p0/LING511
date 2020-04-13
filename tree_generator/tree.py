@@ -61,8 +61,9 @@ CNF_RIGHT_DELIMITER = '>'
 
 # mapping = {'NP-SBJ': 'NP', 'NP-TMP': 'NP'}
 
-# MODAL_TAGS = ["VBD", "MD"]
-MODAL_TAGS = ["V"]
+MODAL_TAGS = ["VBD", "MD"]
+VERB_TAGS = ["VB", "VBN", "VBD", "VBG"]
+#MODAL_TAGS = ["V"]
 TENSE_TAG = 'T'
 EMPTY_SET = "∅"
 
@@ -397,28 +398,65 @@ class Tree(object):
             parent = current.parent()
             tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
 
-            next_pt = self.next_preterminal(t.parent()[1])
-            if (next_pt.label() in MODAL_TAGS):
+            #next_pt = self.next_preterminal(t.parent()[1])
+            next_pt = self.next_preterminal(t, parent)
+
+            if (next_pt.label() == "RB"):
+                next_pt = self.next_preterminal(next_pt, parent)
+                if (next_pt.label() in VERB_TAGS):
+                    parent.remove(current)
+                    grandpa = parent.parent()
+                    grandpa.insert(len(grandpa) - 1, tense_node)
+                    parent = nltk.tree.ParentedTree.convert(parent)
+                    grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                    parent = self.remove_duplicates(parent, grandpa)
+            elif (next_pt.label() in VERB_TAGS):
                 parent.remove(current)
-                #parent = nltk.tree.ParentedTree.convert(parent)
                 grandpa = parent.parent()
                 grandpa.insert(len(grandpa) - 1, tense_node)
-                #grandpa = nltk.tree.ParentedTree.convert(grandpa)
                 parent = nltk.tree.ParentedTree.convert(parent)
                 grandpa = nltk.tree.ParentedTree.convert(grandpa)
                 parent = self.remove_duplicates(parent, grandpa)
-                parent = nltk.tree.ParentedTree.convert(parent)
-                grandpa = nltk.tree.ParentedTree.convert(grandpa)
 
         for child in t:
             self.promote_tense(child)
 
-    def next_preterminal(self, t):
-        while True:
-            if type(t[0]) != str:
-                t = t[0]
-            else:
-                return t
+    # def get_subtree_position(self, t, root):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         # print(t)
+    #         return
+    #
+    #
+    #
+    #     for child in t:
+    #         self.promote_tense(child)
+
+    def next_preterminal(self, subtree, root):
+
+        position = -1
+        i = 0
+        for st in root:
+            if st == subtree:
+                position = i
+                break
+            i += 1
+
+        if position > -1:
+            t = root[position + 1]
+            while True:
+                if type(t[0]) != str:
+                    t = t[0]
+                else:
+                    return t
+
+    # def next_preterminal(self, t):
+    #     while True:
+    #         if type(t[0]) != str:
+    #             t = t[0]
+    #         else:
+    #             return t
 
     def traverse_tree_words(self, t):
         # print("tree:", tree)
@@ -642,6 +680,8 @@ class Tree(object):
             self.add_complement(child)
 
     def parse_sentence(self, sentence):
+        print(sentence)
+
         tree = next(self.parser.raw_parse(sentence))
 
         print(f"STANFORD: ********************************")
@@ -652,7 +692,10 @@ class Tree(object):
         # print(f"COLLAPSE TREE: ********************************")
         # nltk.Tree.pretty_print(tree)
 
-        tree = self.convert_tree_labels(tree, tag_mapping)
+        # tree = self.convert_tree_labels(tree, tag_mapping)
+        # print(f"CONVERT: ********************************")
+        # nltk.Tree.pretty_print(tree)
+        # print(str(tree))
 
         ###############
         # self.write_to_file(tree, "XXXXXX")
@@ -671,6 +714,11 @@ class Tree(object):
 
         tree = self.expand_phrase(tree)
         self.add_complement(tree)
+
+        tree = self.convert_tree_labels(tree, tag_mapping)
+        print(f"CONVERT: ********************************")
+        nltk.Tree.pretty_print(tree)
+        print(str(tree))
 
         return tree[0]
 
