@@ -362,7 +362,6 @@ class Tree(object):
                 img.load(scale=4)
                 img.save(f"{filename}.png")
 
-
     def convert_tree_labels(self, tree, mapping):
         children = []
 
@@ -421,18 +420,6 @@ class Tree(object):
         for child in t:
             self.promote_tense(child)
 
-    # def get_subtree_position(self, t, root):
-    #     try:
-    #         t.label()
-    #     except AttributeError:
-    #         # print(t)
-    #         return
-    #
-    #
-    #
-    #     for child in t:
-    #         self.promote_tense(child)
-
     def next_preterminal(self, subtree, root):
 
         position = -1
@@ -450,13 +437,6 @@ class Tree(object):
                     t = t[0]
                 else:
                     return t
-
-    # def next_preterminal(self, t):
-    #     while True:
-    #         if type(t[0]) != str:
-    #             t = t[0]
-    #         else:
-    #             return t
 
     def traverse_tree_words(self, t):
         # print("tree:", tree)
@@ -708,6 +688,11 @@ class Tree(object):
         self.promote_tense(tree)
         #tree = nltk.ParentedTree.convert(tree)
 
+
+        tree = self.convert_tree_labels(tree, tag_mapping)
+        print(f"CONVERT: ********************************")
+        nltk.Tree.pretty_print(tree)
+
         tree = nltk.Tree.convert(tree)
         tree = self.collapse_duplicate(tree)
         tree = nltk.Tree.convert(tree)
@@ -715,9 +700,6 @@ class Tree(object):
         tree = self.expand_phrase(tree)
         self.add_complement(tree)
 
-        tree = self.convert_tree_labels(tree, tag_mapping)
-        print(f"CONVERT: ********************************")
-        nltk.Tree.pretty_print(tree)
         print(str(tree))
 
         return tree[0]

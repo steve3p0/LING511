@@ -118,19 +118,37 @@ class TestTree(unittest.TestCase):
 
         self.assertEqual(t, new_tree)
 
-    # def test_traverse_tree_string(self):
-    #     tree_str = inspect.cleandoc("""
-    #     (ROOT
-    #       (S
-    #         (NP (DT The) (NN buffalo))
-    #         (VP (VBD were) (VP (VBG pursuing) (NP (JJ fresh) (NN grass))))))""")
-    #
-    #     t = nltk_tree.fromstring(tree_str)
-    #
-    #     tree = Tree()
-    #     w = ""
-    #     tree.traverse_tree_words(t, w)
-    #     print(f"sentence: {w}")
+    def test_promote_tense_1(self):
+        tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NN herd))
+          (VP
+            (ADVP (RB slowly))
+            (VBD came)
+            (PP (TO to) (NP (DT a) (NN stop))))))""")
+
+        t = nltk_tree.fromstring(tree_str)
+
+        psu_tree = Tree()
+        new_tree = psu_tree.copy_tree(t)
+
+        self.assertEqual(t, new_tree)
+
+    def test_next_preterminal(self):
+        tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NN herd))
+          (VP
+            (ADVP (RB slowly))
+            (VBD came)
+            (PP (TO to) (NP (DT a) (NN stop))))))""")
+
+        t = nltk_tree.fromstring(tree_str)
+
+        psu_tree = Tree()
+        new_tree = psu_tree.copy_tree(t)
+
+        self.assertEqual(t, new_tree)
 
     def test_tree_to_string(self):
         self.fail()
