@@ -361,11 +361,8 @@ class Tree(object):
                 img.load(scale=4)
                 img.save(f"{filename}.png")
 
+
     def convert_tree_labels(self, tree, mapping):
-        # '''
-        # >>> convert_tree_labels(Tree('S', [Tree('NP-SBJ', [('foo', 'NN')])]), {'NP-SBJ': 'NP'})
-        # Tree('S', [Tree('NP', [('foo', 'NN')])])
-        # '''
         children = []
 
         for t in tree:
@@ -387,15 +384,6 @@ class Tree(object):
                 parent.insert(len(parent), only_child)
                 parent = nltk.tree.ParentedTree.convert(parent)
                 return parent
-
-
-        # if len(t) == 1:
-        #     #only_child = getattr(t[0], 'label', lambda: None)()
-        #     only_child = t[0]
-        #     if only_child.label() == t.label():
-        #         grandpa = t.parent()
-        #         grandpa.insert(0, only_child)
-        #         grandpa.remove(t)
 
     def promote_tense(self, t):
         try:
@@ -452,6 +440,26 @@ class Tree(object):
         return new_tree
 
     def collapse_duplicate_nodes(self, t, label):
+        try:
+            t.label()
+        except AttributeError:
+            #print(t)
+            return
+
+        if t.label() == label and len(t) == 1:
+            only_child = t[0]
+            if only_child.label() == label:
+                t.remove(t[0])
+                i = 0
+                for leaf in only_child:
+                    leaf = nltk.tree.ParentedTree.convert(leaf)
+                    t.insert(i, leaf)
+                    i += 1
+
+        for child in t:
+            self.collapse_duplicate_nodes(child, label)
+
+    def collapse_duplicate_nodes1(self, t, label):
         try:
             t.label()
         except AttributeError:
@@ -655,9 +663,10 @@ class Tree(object):
 
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
-        tree = nltk.ParentedTree.convert(tree)
+        #tree = nltk.ParentedTree.convert(tree)
 
-        #tree = self.collapse_duplicate(tree)
+        tree = nltk.Tree.convert(tree)
+        tree = self.collapse_duplicate(tree)
         tree = nltk.Tree.convert(tree)
 
         tree = self.expand_phrase(tree)

@@ -84,7 +84,7 @@ class TestTree(unittest.TestCase):
 
         assert(vbg.label() == "VBG")
 
-    def test_traverse_tree(self):
+    def test_traverse_tree_small(self):
         tree_str = inspect.cleandoc("""
         (VP (VP (V pursuing) (NP (AdjP (Adj fresh)) (N grass)))))""")
 
@@ -104,6 +104,19 @@ class TestTree(unittest.TestCase):
 
         tree = Tree()
         tree.traverse_tree_words(t)
+
+    def test_copy_tree(self):
+        tree_str = inspect.cleandoc("""
+        (S
+          (NP (DT The) (NN buffalo))
+          (VP (VBD were) (VP (VBG pursuing) (NP (JJ fresh) (NN grass)))))""")
+
+        t = nltk_tree.fromstring(tree_str)
+
+        psu_tree = Tree()
+        new_tree = psu_tree.copy_tree(t)
+
+        self.assertEqual(t, new_tree)
 
     # def test_traverse_tree_string(self):
     #     tree_str = inspect.cleandoc("""
