@@ -485,6 +485,33 @@ class Tree(object):
         for child in t:
             self.collapse_only_child(child, label)
 
+    # def collapse_phrases(self, t, label):
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         #print(t)
+    #         return
+    #
+    #     if t.label() == label:
+    #         for c in t:
+    #             if c.label() == label:
+    #                 # move
+    #                 i = 0
+    #                 for g in c:
+    #                     new_g = nltk.tree.ParentedTree.convert(g)
+    #                     t.insert(len(t) - 1, new_g)
+    #                     #t = nltk.tree.ParentedTree.convert(t)
+    #                     c.remove(g)
+    #                     c = nltk.tree.ParentedTree.convert(c)
+    #
+    #                 print(f"child: {c.label}")
+    #                 t.remove(c)
+    #                 return
+    #                 # break
+    #
+    #     for child in t:
+    #         self.collapse_phrases(child, label)
+
     def collapse_phrases(self, t, label):
         try:
             t.label()
@@ -492,19 +519,62 @@ class Tree(object):
             #print(t)
             return
 
+        moved = False
+
+        index = 0
+        to_move = []
+        to_remove = None
         if t.label() == label:
+            i = 0
             for c in t:
                 if c.label() == label:
                     # move
-                    i = 0
+                    index = i
+
                     for g in c:
-                        t.insert(len(t) - 1, g)
-                        c.remove(g)
+                        #g = nltk.ParentedTree.convert(g)
+                        to_move.insert(0, g)
+                    to_remove = c
+                i += 1
 
-                    print(f"child: {c.label}")
-                    #t.remove(c)
-                    # break
+        if to_remove is not None:
+            t.remove(to_remove)
+            #t = nltk.ParentedTree.convert(t)
 
+            t.extend(reversed(to_move))
+            # i = 0
+            # for g in to_move:
+            #     #t.insert(0, g)
+            #     #t.insert(len(t) - 1, g)
+            #     #t.insert(len(t), g)
+            #     #t.insert(len(t) - len(to_move), g)
+            #     #t.insert(index + i, g)
+            #     # t.insert(i, g)
+            #     # i += 1
+            #
+            #     #t = nltk.ParentedTree.convert(t)
+
+            return
+
+
+            #             g = nltk.ParentedTree.convert(g)
+            #             c.remove(g)
+            #             c = nltk.ParentedTree.convert(c)
+            #             t.insert(len(t) - 1, g)
+            #             t = nltk.ParentedTree.convert(t)
+            #             #t = nltk.ParentedTree.convert(t)
+            #
+            #         print(f"child: {new_c.label}")
+            #         t = nltk.ParentedTree.convert(t)
+            #
+            #         moved = True
+            #         #return
+            #         #t.remove(c)
+            #         #t.pop(len(t) - 1)
+            #         # break
+            #
+            # if moved:
+            #     t.remove(c)
 
         for child in t:
             self.collapse_phrases(child, label)
@@ -713,6 +783,8 @@ class Tree(object):
         self.collapse_only_child(tree, "VP")
         tree = nltk.tree.Tree.convert(tree)
 
+        # print(f"BEFORE COLLAPSE: ********************************")
+        nltk.Tree.pretty_print(tree)
         self.collapse_phrases(tree, "VP")
         tree = nltk.tree.Tree.convert(tree)
 
