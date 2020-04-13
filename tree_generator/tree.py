@@ -386,6 +386,9 @@ class Tree(object):
                 return parent
 
     def promote_tense(self, t):
+        # VBN - Verb, past participle
+        # VBP - Verb, non-3rd person singular present
+        # VBZ
         try:
             t.label()
         except AttributeError:
@@ -447,16 +450,6 @@ class Tree(object):
             else:
                 print(subtree, end=" ")
 
-    def promote_modals_to_tense(self, t):
-        # VBN - Verb, past participle
-        # VBP - Verb, non-3rd person singular present
-        # VBZ
-        ptree = nltk.tree.ParentedTree.convert(t)
-        self.promote_tense(ptree)
-        new_tree_str = str(ptree)
-        new_tree = nltk.tree.Tree.fromstring(new_tree_str)
-        return new_tree
-
     def collapse_duplicate_nodes(self, t, label):
         try:
             t.label()
@@ -473,75 +466,6 @@ class Tree(object):
                     leaf = nltk.tree.ParentedTree.convert(leaf)
                     t.insert(i, leaf)
                     i += 1
-
-        for child in t:
-            self.collapse_duplicate_nodes(child, label)
-
-    def collapse_duplicate_nodes1(self, t, label):
-        try:
-            t.label()
-        except AttributeError:
-            #print(t)
-            return
-
-        if t.label() == label:
-            current = t
-            parent = current.parent()
-            if parent.label() == label and current.right_sibling() is None:
-                current = t
-                parent = current.parent()
-
-                child_count = len(parent)
-
-                # You have to refresh grandparent after parent did a pop
-                grandpa = parent.parent()
-
-                if len(parent) > 2:
-                    for i in (0, len(parent) - 2):
-
-                        # Save left sibling of the current node before we pop it!
-                        # We will make it the left child of the current node
-                        # p_left_child = current.left_sibling()
-                        # p_left_child = nltk.tree.ParentedTree.convert(p_left_child)
-                        oldest = parent[0]
-                        oldest = nltk.tree.ParentedTree.convert(oldest)
-
-                        # We are going to pop the left sibling move it down to the left most
-                        #parent.pop(0)
-                        #parent.pop(i)
-                        parent.remove(oldest)
-                        parent = nltk.tree.ParentedTree.convert(parent)
-
-                        # Now insert the popped off left_child into the left-most child spot of current node
-                        #current.insert(0, p_left_child)
-                        #current.insert(i, oldest)
-                        length = len(current) - 2
-                        current.insert(length, oldest)
-                        current = nltk.tree.ParentedTree.convert(current)
-                else:
-                    # Save left sibling of the current node before we pop it!
-                    # We will make it the left child of the current node
-                    p_left_child = current.left_sibling()
-
-                    # We are going to pop the left sibling move it down to the left most
-                    parent.pop(0)
-
-                    # You have to refresh grandparent after parent did a pop
-                    grandpa = parent.parent()
-
-                    # Now insert the popped off left_child into the left-most child spot of current node
-                    current.insert(0, p_left_child)
-
-                # Now Pop off the right most child of grandpa (which is the current node)
-                grandpa.pop(len(grandpa) - 1)
-
-                # Now promote up the duplicate child (current) to the right most child of the grandparent
-                # You have to covert to do this again to kill current's parents?  Makes no sense!!!
-                current = nltk.tree.ParentedTree.convert(current)
-                grandpa.insert(len(grandpa), current)
-
-                # test t back to current before continuing to traverse.
-                t = current
 
         for child in t:
             self.collapse_duplicate_nodes(child, label)
@@ -686,8 +610,6 @@ class Tree(object):
 
         tree = nltk.ParentedTree.convert(tree)
         self.promote_tense(tree)
-        #tree = nltk.ParentedTree.convert(tree)
-
 
         tree = self.convert_tree_labels(tree, tag_mapping)
         print(f"CONVERT: ********************************")
