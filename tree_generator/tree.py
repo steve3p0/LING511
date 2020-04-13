@@ -65,7 +65,7 @@ MODAL_TAGS = ["VBD", "MD"]
 VERB_TAGS = ["VB", "VBN", "VBD", "VBG"]
 #MODAL_TAGS = ["V"]
 TENSE_TAG = 'T'
-EMPTY_SET = "∅"
+EMPTY_SET = "∅"  # Ø
 
 # Reverse dictionary lookup
 # keys = [key for key, value in dict_obj.items() if value == 'value']
@@ -680,9 +680,9 @@ class Tree(object):
 
         tree = next(self.parser.raw_parse(sentence))
 
-        print(f"STANFORD: ********************************")
-        nltk.Tree.pretty_print(tree)
-        print(str(tree))
+        # print(f"STANFORD: ********************************")
+        # nltk.Tree.pretty_print(tree)
+        # print(str(tree))
 
         #tree = self.collapse_duplicate(tree)
         # print(f"COLLAPSE TREE: ********************************")
@@ -722,7 +722,7 @@ class Tree(object):
 
         self.add_complement(tree)
 
-        print(str(tree))
+        #print(str(tree))
 
         return tree[0]
 
