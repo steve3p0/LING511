@@ -615,6 +615,7 @@ class Tree(object):
         print(f"CONVERT: ********************************")
         nltk.Tree.pretty_print(tree)
 
+        # Moved Convert after promote
         tree = nltk.Tree.convert(tree)
         tree = self.collapse_duplicate(tree)
         tree = nltk.Tree.convert(tree)
