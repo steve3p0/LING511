@@ -423,6 +423,17 @@ class Tree(object):
         for child in t:
             self.promote_tense(child)
 
+    def get_position(self, subtree, root):
+        position = -1
+        i = 0
+        for st in root:
+            if st == subtree:
+                position = i
+                break
+            i += 1
+
+        return position
+
     def next_preterminal(self, subtree, root):
 
         position = -1
@@ -487,10 +498,11 @@ class Tree(object):
                     # move
                     i = 0
                     for g in c:
-                        t.insert(i, g)
+                        t.insert(len(t) - 1, g)
                         c.remove(g)
 
-                    # t.remove(c)
+                    print(f"child: {c.label}")
+                    #t.remove(c)
                     # break
 
 
