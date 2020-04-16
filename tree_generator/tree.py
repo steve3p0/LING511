@@ -62,7 +62,7 @@ CNF_RIGHT_DELIMITER = '>'
 # mapping = {'NP-SBJ': 'NP', 'NP-TMP': 'NP'}
 
 MODAL_TAGS = ["VBD", "MD"]
-VERB_TAGS = ["VB", "VBN", "VBD", "VBG"]
+VERB_TAGS = ["VB", "VBN", "VBD", "VBG", "VBZ"]
 #MODAL_TAGS = ["V"]
 TENSE_TAG = 'T'
 EMPTY_SET = "∅"  # Ø
@@ -87,6 +87,7 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     'VBN': 'V',
     'VBD': 'V',
     'VBG': 'V',
+    'VBZ': 'V',
     # Adjectives
     'ADJP': 'AdjP',
     'JJ': 'Adj',  # Need to convert JJ to AdjP -> Adj
@@ -680,9 +681,9 @@ class Tree(object):
 
         tree = next(self.parser.raw_parse(sentence))
 
-        # print(f"STANFORD: ********************************")
-        # nltk.Tree.pretty_print(tree)
-        # print(str(tree))
+        print(f"STANFORD: ********************************")
+        nltk.Tree.pretty_print(tree)
+        print(str(tree))
 
         #tree = self.collapse_duplicate(tree)
         # print(f"COLLAPSE TREE: ********************************")
@@ -736,24 +737,49 @@ class Tree(object):
             print(f"{i}. {s}\n{tree_str}\n")
             self.write_to_file(tree, filename)
 
+##################################
+# API Methods
+
+def parse(sentence, parser=None, output=str):
+
+    if parser is None:
+        # Use the default PSU Parser
+        parser = stanford.StanfordParser(model_path=model_path)
+        tree = Tree(parser=parser)
+        tree_str = str(tree.parse_sentence(sentence))
+    elif parser == "stanford":
+        parser = stanford.StanfordParser(model_path=model_path)
+        tree = next(parser.raw_parse(sentence))
+        tree_str = str(tree)
+
+    print(tree_str)
+
+    return tree_str
 
 if __name__ == '__main__':
-    # sentences = ["He thought that other places must be more interesting"]
-
-    sentences = [
-                    "The animals did not think the buffalo would eat them",
-                    "They were afraid the buffalo would trample them",
-                    "The buffalo were pursuing fresh grass",
-                    "Those buffalo were large and lumbering",
-                    "The herd that the animals had heard caused considerable alarm",
-                    "One young buffalo trotted slowly behind the herd",
-                    "He was smelling the fresh grass",
-                    "This buffalo was wondering whether he would find any adventures",
-                    "He was tired of the dry grassy plains",
-                    "He thought that other places must be more interesting"
-                ]
+    # sentences = [
+    #                 "The animals did not think the buffalo would eat them",
+    #                 "They were afraid the buffalo would trample them",
+    #                 "The buffalo were pursuing fresh grass",
+    #                 "Those buffalo were large and lumbering",
+    #                 "The herd that the animals had heard caused considerable alarm",
+    #                 "One young buffalo trotted slowly behind the herd",
+    #                 "He was smelling the fresh grass",
+    #                 "This buffalo was wondering whether he would find any adventures",
+    #                 "He was tired of the dry grassy plains",
+    #                 "He thought that other places must be more interesting"
+    #             ]
+    #
+    # parser = stanford.StanfordParser(model_path=model_path)
+    # tree_builder = Tree(parser)
+    # tree_builder.parse_sentences(sentences)
 
     parser = stanford.StanfordParser(model_path=model_path)
     tree_builder = Tree(parser)
-    tree_builder.parse_sentences(sentences)
+    parse_tree = tree_builder.parse_sentence(sys.argv[1])
+    parse_str = str(parse_tree)
+    print(parse_str)
+    sys.stdout.flush()
+
+
 

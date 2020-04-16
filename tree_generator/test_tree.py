@@ -561,3 +561,97 @@ class TestTenTreesADay4(unittest.TestCase):
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True)
         self.assertEqual(actual_tree, expected_tree)
+
+
+class TestTenTreesADay5(unittest.TestCase):
+
+    def test_10TAD4_01(self):
+        sentence = "The buffalo had always lived on the grassy plains"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 1, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_02(self):
+        sentence = "The buffalo longed for adventure"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 2, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_03(self):
+        #sentence = "He wanted to explore the wide, wide world"
+        sentence = "He wanted to explore the wide wide world"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_04(self):
+        sentence = "The mouse woke the buffalo early one day"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_05(self):
+        sentence = "The mouse told the buffalo that there were places far away"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_06(self):
+        sentence = "The mouse’s stories were very interesting"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_07(self):
+        sentence = "The buffalo decided to travel to new places"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_08(self):
+        sentence = "He trotted eagerly away from his herd"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_09(self):
+        sentence = "He soon came to a river"
+        expected_parse_str = inspect.cleandoc("""
+        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD4_10(self):
+        sentence = "The river blocked the buffalo’s path"
+        expected_parse_str = inspect.cleandoc("""
+            (TP 
+                (NP (D The) (N buffalo)) 
+                (T would) 
+                (VP (V have) 
+                    (VP 
+                        (V listened) 
+                        (PP (P to) (NP (N her))) 
+                        (PP (P for) (NP (N hours)))
+                    )
+                )
+            )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        self.assertEqual(actual_tree, expected_tree)
