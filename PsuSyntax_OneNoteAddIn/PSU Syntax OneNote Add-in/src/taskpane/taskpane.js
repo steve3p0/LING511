@@ -5,6 +5,8 @@
 
 /* global document, Office */
 
+const HOST = "https://47abd88d.ngrok.io"
+
 Office.onReady(info =>
 {
     if (info.host === Office.HostType.OneNote)
@@ -50,9 +52,9 @@ export async function run() {
                     var selectedText = asyncResult.value
                     var parseStr = "";
 
-                    const host = "https://47abd88d.ngrok.io"
+                    const HOST = "https://47abd88d.ngrok.io"
                     const axios = require('axios').default;
-                    axios.post(host + '/parse',
+                    axios.post(HOST + '/parse',
                     {
                         sentence: selectedText
                     })
