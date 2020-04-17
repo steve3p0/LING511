@@ -154,7 +154,17 @@ class TestTree(unittest.TestCase):
         self.fail()
 
     def test_write_to_file(self):
-        self.fail()
+        filename = "test_write_to_file"
+        parse_str = "(S (NP (N Steve)) (VP (V drinks) (NP (N cider))))"
+
+        tree = nltk_tree.fromstring(parse_str)
+        psu_tree = Tree()
+        psu_tree.write_to_file(tree, filename)
+
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        full_file_path = dir_path + "\\" + filename + ".png"
+
+        self.assertTrue(os.path.isfile(full_file_path))
 
     def test_parse_stanford(self):
         sentence = "He thought that other places must be more interesting"

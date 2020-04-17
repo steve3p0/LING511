@@ -1,6 +1,5 @@
 import os
 from typing import Dict, Any, Union
-
 from nltk.parse import stanford
 import nltk
 from nltk.draw.tree import TreeView
@@ -740,21 +739,60 @@ class Tree(object):
 ##################################
 # API Methods
 
-def parse(sentence, parser=None, output=str):
+#def parse(sentence, parser=None, output="bracketed", brackets="[]"):
+def parse(sentence, parser, formats):
+    tree_str = ""
 
-    if parser is None:
+    if parser == "pdx":
         # Use the default PSU Parser
         parser = stanford.StanfordParser(model_path=model_path)
-        tree = Tree(parser=parser)
-        tree_str = str(tree.parse_sentence(sentence))
+        psu_tree = Tree(parser=parser)
+        tree = psu_tree.parse_sentence(sentence)
     elif parser == "stanford":
         parser = stanford.StanfordParser(model_path=model_path)
         tree = next(parser.raw_parse(sentence))
-        tree_str = str(tree)
 
     print(tree_str)
 
-    return tree_str
+    # Create dictionary of parse objects to return
+    output_formats = {}
+
+    if "tree_image" in formats:
+        print("do image thingy")
+        # filename = "tree"
+        # dir_path = os.path.dirname(os.path.realpath(__file__))
+        # full_file_path = dir_path + "\\" + filename + ".png"
+        # psu_tree.write_to_file(tree, "tree")
+        # if os.path.isfile(full_file_path):
+        #     return full_file_path
+        #return tree._repr_png_()
+    else:
+        if "tree_ascii" in formats:
+            print("add tree_ascii to output")
+            ascii_str = nltk.Tree.pretty_print(tree)
+            output_formats["tree_ascii"] = ascii_str
+
+        if "bracketed_diagram" in formats:
+            print("add labelled_bracket to output")
+            bracketed_diagram = str(tree)
+            open_b, close_b = "[]"
+            bracketed_diagram = tree_str.replace("(", open_b).replace(")", close_b)
+            bracketed_diagram = " ".join(tree_str.split())
+            output_formats["bracketed_diagram"] = bracketed_diagram
+
+        if "tree_str" in formats:
+            print("add tree_str to output")
+            tree_str = str(tree)
+            tree_str = " ".join(tree_str.split())
+            output_formats["tree_str"] = tree_str
+
+    parse_dict = {}
+    parse_dict["sentence"] = sentence
+    parse_dict["parser"] = parser
+    parse_dict["output_formats"] = output_formats
+
+    return parse_dict
+
 
 if __name__ == '__main__':
     # sentences = [

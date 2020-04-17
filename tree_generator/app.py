@@ -1,4 +1,4 @@
-# Rock Paper Scissors Lisard Spock
+# PSU Syntax Library API
 # By Steve Braich
 #
 # Sources:
@@ -9,6 +9,7 @@ from flask_restful import Resource, Api
 from typing import List, Dict
 from flask_cors import CORS
 from json import JSONDecodeError
+#import json
 
 import tree
 import tree_exceptions
@@ -19,12 +20,10 @@ api = Api(app)
 
 
 class Parse(Resource):
-    """ Encapsulates an abstract RESTful resource for POSTing a play (round) of the game """
-
-    player: int
+    """ Encapsulates an abstract RESTful resource for POSTing a parse request """
 
     def __init__(self) -> None:
-        """ Constructor for Play class that sets up an HTTP POST """
+        """ Constructor for Parse that sets up an HTTP POST """
         try:
             json_data = request.get_json(force=True)
             self.sentence = json_data['sentence']
@@ -34,6 +33,11 @@ class Parse(Resource):
             else:
                 self.parser = None
 
+            if "outputs" in json_data:
+                self.output = json_data['formats']
+            else:
+                self.output = None
+
         except TypeError as err:
             raise tree_exceptions.InvalidUsage(err.message, 400, request.get_data())
         except JSONDecodeError as err:
@@ -42,13 +46,16 @@ class Parse(Resource):
             raise tree_exceptions.InvalidUsage(err.message, 400, request.get_data())
 
     def post(self) -> Dict:
-        """ HTTP POST call that plays a game
+        """ HTTP POST call parses a string
         :return: Dict[result] (example { 'results': 'win', 'player': 1, computer: 5 }
         :rtype: Union[Dict[str, str], None]
         """
 
         try:
-            result = tree.parse(self.sentence, parser=self.parser)
+            result = tree.parse(self.sentence, parser=self.parser, request_outputs=self.output)
+            #JSON.stringify(result)
+            #result = j
+
             return result
         except IndexError as err:
             raise tree_exceptions.InvalidUsage(err.message, 400, request.get_data())
@@ -57,8 +64,8 @@ class Parse(Resource):
 api.add_resource(Parse, '/parse')
 
 if __name__ == '__main__':
-    #app.run()
-    app.run(ssl_context='adhoc')
-    # app.run(debug=True)
+    # app.run()
+    # app.run(ssl_context='adhoc')
+    app.run(debug=True)
     # app.run(debug=False)
     # app.run(debug=True, use_debugger=False, use_reloader=False, passthrough_errors=True)
