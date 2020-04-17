@@ -123,6 +123,7 @@ export async function run() {
                     const parserType = document.querySelector('#types input[name="parser_type"]:checked').value;
 
                     //var data = {};
+
                     var data = new FormData();
                     data.append("sentence", selectedText);
                     data.append("parser", parserType);
