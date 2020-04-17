@@ -15,11 +15,15 @@
      margin: 0;
      padding: 0;
  }
- 
+
+.error {
+    border:2px solid #ff0000;
+}
+
  .ms-welcome__header {
     padding: 20px;
     padding-bottom: 30px;
-    padding-top: 100px;
+    padding-top: 25px;
     display: -webkit-flex;
     display: flex;
     -webkit-flex-direction: column;

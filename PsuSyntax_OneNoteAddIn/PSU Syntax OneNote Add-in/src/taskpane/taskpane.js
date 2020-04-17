@@ -37,7 +37,53 @@ export async function run() {
             // // Queue a command to add an outline to the page.
             // var html = "<p><ol><li>Item #1</li><li>Item #2</li></ol></p>";
             // page.addOutline(40, 90, html);
+            //const checkedOutputFormats = document.querySelector('#outputs input[type=checkbox]:checked").value;
 
+
+
+            // const ckb = document.querySelectorAll("#myDiv input[type=checkbox]");
+            //
+            // [...ckb].forEach( el => {
+            //
+            //     if( el.checked ) {
+            //         // Is checked!
+            //         console.log( el.value )
+            //         el.closest("label").style.background = "gold";
+            //     } else {
+            //         // Not checked one
+            //         // ... do something else
+            //         el.closest("label").style.background = "gray";
+            //     }
+            //
+            // });
+
+            //var blah = document.getElementById("treeImage").
+            // var parserType = document.querySelector('input[name="type"]:checked').value;
+            // var outputFormats = document.querySelector('input[name="output"]:checked').value;
+            //
+            // var tree_image = document.getElementById("tree_image").checked
+            //
+            // var tree_image = ""
+            // if (tree_image)
+            // {
+            //
+            // }
+
+            // var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            // var checkedOne = Array.prototype.slice.call(checkboxes).some(x => x.checked);
+
+            // if (!checkedOne)
+            // {
+            //     //alert("Please check at least one output format.")
+            //     document.getElementById("outputFormats").style.borderColor = "#ff0000";
+            //
+            //     // document.getElementById("outputFormats").style.border="1px solid red";
+            //     //
+            //     // document.getElementById("fName").className = document.getElementById("fName").className + " error";  // this adds the error class
+            //     //
+            //     // document.getElementById("fName").className = document.getElementById("fName").className.replace(" error", "");
+            //
+            // }
 
             Office.context.document.getSelectedDataAsync(Office.CoercionType.Text, function (asyncResult)
             {
@@ -52,12 +98,39 @@ export async function run() {
                     var selectedText = asyncResult.value
                     var parseStr = "";
 
-                    const HOST = "https://47abd88d.ngrok.io"
-                    const axios = require('axios').default;
-                    axios.post(HOST + '/parse',
+                    var outputs = []
+                    const ckb = document.querySelectorAll("#outputs input[type=checkbox]");
+                    var checkedOne = Array.prototype.slice.call(ckb).some(x => x.checked);
+
+                    if (!checkedOne)
                     {
-                        sentence: selectedText
-                    })
+                        // Then fuckoff
+                        // You need to select at least one output format
+                    }
+
+                    [...ckb].forEach( el =>
+                    {
+                        if( el.checked )
+                        {
+                            // Is checked!
+                            outputs.push(el.id)
+                            //data.append(el.name, True)
+                            console.log( el.id )
+                        }
+                    });
+
+                    //const parserType = document.querySelector('input[name="type"]:checked').value;
+                    const parserType = document.querySelector('#types input[name="parser_type"]:checked').value;
+
+                    //var data = {};
+                    var data = new FormData();
+                    data.append("sentence", selectedText);
+                    data.append("parser", parserType);
+                    data.append("formats", JSON.stringify(outputs))
+
+                    const HOST = "https://211777d5.ngrok.io"
+                    const axios = require('axios').default;
+                    axios.post(HOST + '/parse', data)
                     .then(function (response)
                     {
                         parseStr = response.data;

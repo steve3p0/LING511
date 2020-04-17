@@ -22,32 +22,55 @@
 
 <body class="ms-font-m ms-welcome ms-Fabric">
     <header class="ms-welcome__header ms-bgColor-neutralLighter">
-        <img width="90" height="90" src="../../assets/logo-filled.png" alt="Contoso" title="Contoso" />
-        <h1 class="ms-font-su">Welcome</h1>
+        <img width="90" height="90" src="../../assets/viking.png" alt="Portland State University" title="Portland State University" />
+        <h2 class="ms-font-xl">Portland State University</h2>
+        <span style="font-size:18px">PDX Parser</span>
     </header>
     <section id="sideload-msg" class="ms-welcome__main">
         <h2 class="ms-font-xl">Please sideload your add-in to see app body.</h2>
     </section>
     <main id="app-body" class="ms-welcome__main" style="display: none;">
-        <h2 class="ms-font-xl"> Discover what Office Add-ins can do for you today! </h2>
-        <ul class="ms-List ms-welcome__features">
-            <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Ribbon ms-font-xl"></i>
-                <span class="ms-font-m">Achieve more with Office integration</span>
-            </li>
-            <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Unlock ms-font-xl"></i>
-                <span class="ms-font-m">Unlock features and functionality</span>
-            </li>
-            <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
-                <span class="ms-font-m">Create and visualize like a pro</span>
-            </li>
-        </ul>
-        <p class="ms-font-l">Modify the source files, then click <b>Run</b>.</p>
-        <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
-            <span class="ms-Button-label">Run</span>
+
+        <fieldset>
+            <legend>Parser Type</legend>
+            <div id="types">
+                <input type="radio" name="parser_type" id="pdx" value="pdx" checked>
+                <label for="pdx">PDX Parser</label><br>
+
+                <input type="radio" name="parser_type" id="stanford" value="stanford">
+                <label for="stanford">Stanford Parser</label><br>
+            </div>
+        </fieldset>
+
+        <br>
+        <br>
+
+        <fieldset id="outputFormatFieldset" name="outputFormatFieldset">
+            <legend>Output Formats</legend>
+            <div id="outputs">
+                <input type="checkbox" id="tree_image" name="output" value="tree_image" checked>
+                <label for="treeImage">Syntax Tree (image)</label> <br>
+
+                <input type="checkbox" id="tree_ascii" name="output" value="tree_ascii">
+                <label for="treeAscii">Syntax Tree (Ascii)</label> <br>
+
+                <input type="checkbox" id="bracketed_diagram" name="output" value="bracketed_diagram">
+                <label for="bracket">Bracketed Diagram</label> <br>
+
+                <input type="checkbox" id="tree_str" name="output" value="tree_str">
+                <label for="parseStr">Parse String</label> <br>
+            </div>
+        </fieldset>
+
+        <br>
+        <br>
+
+        <div>
+            <input id="run" class="favorite styled"
+                   type="button"
+                   value="Parse">
         </div>
+
     </main>
 </body>
 
