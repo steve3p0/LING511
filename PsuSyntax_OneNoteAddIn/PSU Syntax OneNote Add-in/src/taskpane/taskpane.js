@@ -128,63 +128,39 @@ function createHtmlParseTable(data)
     const bracketDiagram = formats["bracket_diagram"];
     const parseStr = formats["tree_str"];
 
-    const html_asciiTree =
+    // const html_asciiTree =
+    //     "<span style='font-family: Courier New'>"
+    //     + "<p>"
+    //     + asciiTree
+    //     + "</p>"
+    //     + " </span>";
+
+
+    // Build html span for ASCII Tree
+    var html_asciiTree =
         "<span style='font-family: Courier New'>"
-        + "<p>"
+        + "<pre>"
         + asciiTree
-        + "</p>"
-        + " </span>";
+        + "</pre>"
+        + "</span>";
+
+    //var html_asciiTree = html_asciiTree_before.replace(/ /g, '\u00a0');
+
+    //const nbsp = "&nbsp"
 
     // const html_asciiTree =
     //     "<p>"
     //     + response_asciiTree
     //     + "</p>";
 
-    // //var data = {};
-    // var table = document.createElement(OneNote.Table)
-    //
-    // // table.appendRow("Syntax Tree (Image)")
-    // // table.appendRow("")
-    // table.appendRow("Syntax Tree (ASCII)")
-    // table.appendRow("<span style='font-family: Courier New'>" + response_asciiTree + "</span>")
-    // table.appendRow("Bracket Diagram:")
-    // table.appendRow(response_bracketDiagram)
-    // table.appendRow("Parse String:")
-    // table.appendRow(response_parseStr)
-
-    // var appBody = document.getElementById("app-body")
-    // appBody.append(
-    //     document.createElement(OneNote.Table)
-    //         .appendRow("Syntax Tree (ASCII)")
-    //         .appendRow("<span style='font-family: Courier New'>" + response_asciiTree + "</span>")
-    //         .appendRow("Bracket Diagram:")
-    //         .appendRow(response_bracketDiagram)
-    //         .appendRow("Parse String:")
-    //         .appendRow(response_parseStr)
-    // )
-
-    // var row  =  document.createElement(OneNote.TableRow)
-    // var cell =  document.createElement(OneNote.TableCell)
-
-    // const html_asciiTree =
-    //     "<span style='font-family: Courier New'>"
-    //     + response_asciiTree
-    //     + " </span>";
-
-    // // Create newText by appendening parse tree
-    // var newText = selectedText
-    //     + "<br><br>"
-    //     + "Syntax Tree (ASCII): <br>" + html_asciiTree + "<br>"
-    //     + "Bracket Diagram: <br>" + response_bracketDiagram + "<br>"
-    //     + "Parse String: <br>" + response_parseStr + "<br>";
-
-    //var onTable = new OneNote.Table()
-
+    var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]"
 
     // Create newText by appendening parse tree
-    var html =
+    var html = ""
         // CSS Note working?
-        "<table border=1>"
+        + "<table border=1>"
+        //+ "<table border=3D1 cellpadding=3D0 cellspacing=3D0 valign=3Dtop "
+        //    + "style=3D'direction:ltr;border-collapse:collapse;border-style:solid;border-color:#A3A3A3;border-width: 1pt' title=3D'' summary=3D''>"
         //+ "<table class='pdx-ling_parseTable'>"
         //+ "<tr bgcolor='#d3d3d3'><td>"
         //+ "<tr style='background-color: lightgray'><td>"
@@ -192,20 +168,23 @@ function createHtmlParseTable(data)
         //+ "<tr bgcolor='#d3d3d3'><td>"
         //+ "<tr style='background-color: lightgray'><td>"
         //+ "<tr><td bgcolor='#d3d3d3'>"
-        + "<tr><td style='background-color: lightgray'>"
-        + "Syntax Tree (ASCII):"
+        //+ "<tr><td style='background-color: lightgray'>"
+        //+ "<tr><td style=3D'border-style:solid;border-color:#A3A3A3;border-width:1pt;background-color:#D8D8D8;vertical-align:top;width:3.8in;padding:2.0pt 3.0pt 2.0pt 3.0pt'>"
+        + "<tr><td>"
+        + "<b>Syntax Tree (ASCII)</b>"
         + "</td></tr>"
         + "<tr><td>"
         +  html_asciiTree
         + "</td></tr>"
         + "<tr bgcolor='#d3d3d3'><td>"
-        + "Bracket Diagram:"
+        + "<b>Bracket Diagram</b>"
         + "</td></tr>"
         + "<tr><td>"
         + bracketDiagram
+        // + exampleBracketDiagram
         + "</td></tr>"
         + "<tr bgcolor='#d3d3d3'><td>"
-        + "Parse String:"
+        + "<b>Parse String</b>"
         + "</td></tr>"
         + "<tr><td>"
         + parseStr
@@ -240,7 +219,7 @@ function addHOutlineToPage(html) {
         var page = context.application.getActivePage();
 
         // Add an outline with the specified HTML to the page.
-        var outline = page.addOutline(560, 70, html);
+        var outline = page.addOutline(300, 70, html);
 
         // Run the queued commands, and return a promise to indicate task completion.
         return context.sync()
