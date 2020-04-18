@@ -1,0 +1,77 @@
+<html>
+<body>
+
+<style>
+table 
+{
+  border-collapse: collapse;
+}
+
+table, td, th 
+{
+  border: 1px solid darkgrey;
+}
+tr:nth-child(odd) {background: lightgrey}
+tr:nth-child(even) {background: white}
+
+
+</style>
+
+<table border=1>
+<tr>
+<td>
+<!-- <td bgcolor='red'> -->
+<!-- <td style='background-color:red'> -->
+Syntax Tree (ASCII):
+</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+      TP   
+  ____|____   
+ |         VP   
+ |     ____|____   
+ NP   |        NP  
+ |    |        |   
+ N    V        N   
+ |    |        |   
+boy meets    world
+</pre>
+</td>
+</tr>
+
+<tr style='background-color:lightgrey'>
+<td>
+Bracket Diagram:
+</td>
+</tr>
+
+<tr>
+<td>
+[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]
+</td>
+</tr>
+
+<tr style='background-color:lightgrey'>
+<td>
+Parse String: 
+</td>
+</tr>
+
+<tr>
+<td>
+<pre>
+(TP 
+    (NP (N boy)) 
+    (VP 
+        (V meets) 
+        (NP (N world))))
+</pre>
+</td>
+</tr>
+</table>
+
+</body>
+</html>
