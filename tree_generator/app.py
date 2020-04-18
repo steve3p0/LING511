@@ -9,7 +9,7 @@ from flask_restful import Resource, Api
 from typing import List, Dict
 from flask_cors import CORS
 from json import JSONDecodeError
-#import json
+import json
 
 import tree
 import tree_exceptions
@@ -23,7 +23,15 @@ class Parse(Resource):
     """ Encapsulates an abstract RESTful resource for POSTing a parse request """
 
     def __init__(self) -> None:
-        """ Constructor for Parse that sets up an HTTP POST """
+        """ Constructor for Parse that sets up an HTTP POST
+            Example Request.Data
+            {
+                'sentence': 'boy meets world',
+                'parser': 'pdx',
+                'request_formats': [ 'tree_ascii', 'bracket_diagram', 'tree_str']
+            }
+        """
+
         try:
             json_data = request.get_json(force=True)
             self.sentence = json_data['sentence']
@@ -33,10 +41,10 @@ class Parse(Resource):
             else:
                 self.parser = None
 
-            if "outputs" in json_data:
-                self.output = json_data['formats']
+            if "request_formats" in json_data:
+                self.request_formats = json_data['request_formats']
             else:
-                self.output = None
+                self.request_formats = None
 
         except TypeError as err:
             raise tree_exceptions.InvalidUsage(err.message, 400, request.get_data())
@@ -46,16 +54,19 @@ class Parse(Resource):
             raise tree_exceptions.InvalidUsage(err.message, 400, request.get_data())
 
     def post(self) -> Dict:
-        """ HTTP POST call parses a string
-        :return: Dict[result] (example { 'results': 'win', 'player': 1, computer: 5 }
+        """ HTTP POST calls parses a string
+        :return: Dict[result]
+            example
+            {
+                'sentence': 'boy meets world',
+                'parser': 'pdx',
+                'request_formats': [ 'tree_ascii', 'bracket_diagram', 'tree_str']
+            }
         :rtype: Union[Dict[str, str], None]
         """
 
         try:
-            result = tree.parse(self.sentence, parser=self.parser, request_outputs=self.output)
-            #JSON.stringify(result)
-            #result = j
-
+            result = tree.parse(self.sentence, parser=self.parser, request_formats=self.request_formats)
             return result
         except IndexError as err:
             raise tree_exceptions.InvalidUsage(err.message, 400, request.get_data())

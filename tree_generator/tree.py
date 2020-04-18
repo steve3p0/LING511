@@ -740,24 +740,24 @@ class Tree(object):
 # API Methods
 
 #def parse(sentence, parser=None, output="bracketed", brackets="[]"):
-def parse(sentence, parser, formats):
+def parse(sentence, parser, request_formats):
     tree_str = ""
 
     if parser == "pdx":
-        # Use the default PSU Parser
-        parser = stanford.StanfordParser(model_path=model_path)
-        psu_tree = Tree(parser=parser)
+        # Use the default PSU Parser - but first use stanford and convert to PSU format
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        psu_tree = Tree(parser=stanford_parser)
         tree = psu_tree.parse_sentence(sentence)
     elif parser == "stanford":
-        parser = stanford.StanfordParser(model_path=model_path)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
         tree = next(parser.raw_parse(sentence))
 
     print(tree_str)
 
     # Create dictionary of parse objects to return
-    output_formats = {}
+    response_formats = {}
 
-    if "tree_image" in formats:
+    if "tree_image" in request_formats:
         print("do image thingy")
         # filename = "tree"
         # dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -767,32 +767,38 @@ def parse(sentence, parser, formats):
         #     return full_file_path
         #return tree._repr_png_()
     else:
-        if "tree_ascii" in formats:
+        if "tree_ascii" in request_formats:
             print("add tree_ascii to output")
-            ascii_str = nltk.Tree.pretty_print(tree)
-            output_formats["tree_ascii"] = ascii_str
 
-        if "bracketed_diagram" in formats:
+            from nltk.treeprettyprinter import TreePrettyPrinter
+            ascii_str = str(TreePrettyPrinter(tree)).rstrip()
+            #ascii_str = nltk.Tree.pretty_print(tree)
+            response_formats["tree_ascii"] = ascii_str
+
+        if "bracket_diagram" in request_formats:
             print("add labelled_bracket to output")
-            bracketed_diagram = str(tree)
+            bracket_diagram = str(tree)
             open_b, close_b = "[]"
-            bracketed_diagram = tree_str.replace("(", open_b).replace(")", close_b)
-            bracketed_diagram = " ".join(tree_str.split())
-            output_formats["bracketed_diagram"] = bracketed_diagram
+            bracket_diagram = bracket_diagram.replace("(", open_b).replace(")", close_b)
+            bracket_diagram = " ".join(bracket_diagram.split())
+            response_formats["bracket_diagram"] = bracket_diagram
 
-        if "tree_str" in formats:
+        if "tree_str" in request_formats:
             print("add tree_str to output")
             tree_str = str(tree)
             tree_str = " ".join(tree_str.split())
-            output_formats["tree_str"] = tree_str
+            response_formats["tree_str"] = tree_str
 
-    parse_dict = {}
-    parse_dict["sentence"] = sentence
-    parse_dict["parser"] = parser
-    parse_dict["output_formats"] = output_formats
+    res = {'sentence': sentence, 'parser': parser, 'response_formats': response_formats}
 
-    return parse_dict
+    # parse_dict = {}
+    # parse_dict["sentence"] = sentence
+    # parse_dict["parser"] = parser
+    # parse_dict["output_formats"] = output_formats
 
+    # return parse_dict
+
+    return res
 
 if __name__ == '__main__':
     # sentences = [
