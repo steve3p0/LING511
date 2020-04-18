@@ -17,17 +17,13 @@ Office.onReady(info =>
     }
 });
 
-export async function run() {
-    /**
-     * Insert your OneNote code here
-     */
-
+export async function run()
+{
     try
     {
         // eslint-disable-next-line no-undef
         await OneNote.run(async context =>
         {
-
             // Get the current page.
             var page = context.application.getActivePage();
 
@@ -155,13 +151,7 @@ function createHtmlParseTable(data)
         + "</span>";
 
     //var html_asciiTree = html_asciiTree_before.replace(/ /g, '\u00a0');
-
     //const nbsp = "&nbsp"
-
-    // const html_asciiTree =
-    //     "<p>"
-    //     + response_asciiTree
-    //     + "</p>";
 
     var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]"
 
