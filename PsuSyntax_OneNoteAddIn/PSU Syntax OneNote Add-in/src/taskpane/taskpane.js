@@ -90,7 +90,7 @@ export async function run() {
 
                         var html = createHtmlParseTable(response_data);
 
-                        addHOutlineToPage(html);
+                        addOutlineToPage(html);
                         // Add an outline with the specified HTML to the page.
                         var outline = page.addOutline(560, 70, html);
                     })
@@ -118,6 +118,24 @@ function write(message)
     document.getElementById('message').innerText += message;
 }
 
+// Add a table that displays the final grade, individual scores, and comments to the page.
+function addOutlineToPage(html) {
+    OneNote.run(function (context) {
+
+        // Get the current page.
+        var page = context.application.getActivePage();
+
+        // Add an outline with the specified HTML to the page.
+        var outline = page.addOutline(300, 70, html);
+
+        // Run the queued commands, and return a promise to indicate task completion.
+        return context.sync()
+            .catch(function(error) {
+                onError(error);
+            });
+    });
+}
+
 function createHtmlParseTable(data)
 {
     const sentence = data["sentence"];
@@ -127,14 +145,6 @@ function createHtmlParseTable(data)
     const asciiTree = formats["tree_ascii"].replace(/\n/g, "<br />");
     const bracketDiagram = formats["bracket_diagram"];
     const parseStr = formats["tree_str"];
-
-    // const html_asciiTree =
-    //     "<span style='font-family: Courier New'>"
-    //     + "<p>"
-    //     + asciiTree
-    //     + "</p>"
-    //     + " </span>";
-
 
     // Build html span for ASCII Tree
     var html_asciiTree =
@@ -191,40 +201,5 @@ function createHtmlParseTable(data)
         + "</td></tr>"
         + "</table>"
 
-    // // Create newText by appendening parse tree
-    // var newText = selectedText + table
-
-
-    // // Create newText by appendening parse tree
-    // var newText = selectedText
-    // console.log("New text is: " + newText);
-    //
-    // // Replace selected text with newText value.
-    // Office.context.document.setSelectedDataAsync(newText, { coercionType: "html" },
-    //     function (asyncResult) {
-    //         var error = asyncResult.error;
-    //         if (asyncResult.status === Office.AsyncResultStatus.Failed) {
-    //             console.log(error.name + ": " + error.message);
-    //         }
-    //     });
-
     return html
-}
-
-// Add a table that displays the final grade, individual scores, and comments to the page.
-function addHOutlineToPage(html) {
-    OneNote.run(function (context) {
-
-        // Get the current page.
-        var page = context.application.getActivePage();
-
-        // Add an outline with the specified HTML to the page.
-        var outline = page.addOutline(300, 70, html);
-
-        // Run the queued commands, and return a promise to indicate task completion.
-        return context.sync()
-            .catch(function(error) {
-                onError(error);
-            });
-    });
 }
