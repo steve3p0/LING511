@@ -16,14 +16,21 @@
      padding: 0;
  }
 
-.error {
-    border:2px solid #ff0000;
+.pdx-ling_parseTable
+{
+    border-width: 1px;
 }
+
+.pdx-ling_parseTable tr:nth-child(odd)
+ {
+     border-width: 1px;
+     background-color: lightgray;
+ }
 
  .ms-welcome__header {
     padding: 20px;
     padding-bottom: 30px;
-    padding-top: 25px;
+    padding-top: 100px;
     display: -webkit-flex;
     display: flex;
     -webkit-flex-direction: column;
