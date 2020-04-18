@@ -78,12 +78,12 @@ class TestApp(TestCase):
 
         self.assertEqual(expected_result, actual_parse_str)
 
-    def test_parse_post_complex(self):
+    def test_parse_post_f234_student(self):
 
         sentence = "The student loves his syntax homework"
         parser = "pdx"
 
-        input_route = '/parse'
+        input_route = "/parse"
         input_json = \
         {
             "sentence": sentence,
@@ -97,19 +97,19 @@ class TestApp(TestCase):
         actual_response_data = json.loads(actual_response.data)
         self.assertTrue(isinstance(actual_response_data, dict))
 
-        actual_sentence = actual_response_data['sentence']
-        actual_parser = actual_response_data['parser']
-        actual_formats = actual_response_data['response_formats']
+        actual_sentence = actual_response_data["sentence"]
+        actual_parser = actual_response_data["parser"]
+        actual_formats = actual_response_data["response_formats"]
 
         self.assertTrue(isinstance(actual_sentence, str))
         self.assertTrue(isinstance(actual_parser, str))
         self.assertTrue(isinstance(actual_formats, dict))
 
-        actual_tree_ascii = actual_formats['tree_ascii']
+        actual_tree_ascii = actual_formats["tree_ascii"]
         self.assertTrue(isinstance(actual_tree_ascii, str))
-        actual_bracket_diagram = actual_formats['bracket_diagram']
+        actual_bracket_diagram = actual_formats["bracket_diagram"]
         self.assertTrue(isinstance(actual_bracket_diagram, str))
-        actual_tree_str = actual_formats['tree_str']
+        actual_tree_str = actual_formats["tree_str"]
         self.assertTrue(isinstance(actual_tree_str, str))
 
         expected_output_tree_ascii = inspect.cleandoc("""
@@ -151,4 +151,53 @@ The     student loves his     syntax homework""")
         self.assertEqual(expected_output_tree_str, actual_tree_str)
         self.assertEqual(expected_output_bracket_diagram, actual_bracket_diagram)
 
+        self.assertEqual(expected_response_data, actual_response_data)
+
+    def test_parse_post_f234_boy(self):
+
+        sentence = "boy meets world"
+        parser = "pdx"
+
+        input_route = "/parse"
+        input_json = \
+        {
+            "sentence": sentence,
+            "parser": parser,
+            "request_formats": ["tree_ascii", "bracket_diagram", "tree_str"]
+        }
+
+        actual_response = self.client.post(input_route, json=input_json)
+        self.assertEqual(self.expect_status_code, actual_response.status_code)
+
+        actual_response_data = json.loads(actual_response.data)
+        expected_output_tree_ascii = inspect.cleandoc("""
+      TP           
+  ____|____         
+ |         VP      
+ |     ____|____    
+ NP   |         NP 
+ |    |         |   
+ N    V         N  
+ |    |         |   
+boy meets     world""")
+
+        expected_output_bracket_diagram = inspect.cleandoc("""
+            [TP [NP [N boy]] [VP [V meets] [NP [N world]]]]""")
+        expected_output_tree_str = inspect.cleandoc("""
+            (TP (NP (N boy)) (VP (V meets) (NP (N world))))""")
+
+        expected_sentence = sentence
+        expected_parser = parser
+        expected_output = \
+        {
+            "tree_ascii": expected_output_tree_ascii,
+            "bracket_diagram": expected_output_bracket_diagram,
+            "tree_str": expected_output_tree_str
+        }
+        expected_response_data = \
+        {
+            "sentence": expected_sentence,
+            "parser": expected_parser,
+            "response_formats": expected_output
+        }
         self.assertEqual(expected_response_data, actual_response_data)
