@@ -5,7 +5,7 @@
 
 /* global document, Office */
 
-const HOST = "https://7228f422.ngrok.io"
+const HOST = "https://fd6a814d.ngrok.io"
 
 Office.onReady(info =>
 {
@@ -138,9 +138,17 @@ function createHtmlParseTable(data)
     const parser = data["parser"];
     const formats = data["response_formats"];
 
+    const byteImageTree = formats["tree_image"];
     const asciiTree = formats["tree_ascii"].replace(/\n/g, "<br />");
     const bracketDiagram = formats["bracket_diagram"];
     const parseStr = formats["tree_str"];
+
+    // Build html img to hold Byte array image
+    // <img src='name:image-block-name' alt='a cool image' width='500'/>
+    var html_byteImageTree =
+        //"<img src='name:image-block-name' alt='" + sentence + "' width='500'/>"
+        //"<img src='name:image-block-name' alt='" + sentence + "' width='500'/>"
+        "<img src='data:image/jpeg;base64," + byteImageTree + "' alt='" + sentence + "' width='500'/>";
 
     // Build html span for ASCII Tree
     var html_asciiTree =
@@ -170,12 +178,24 @@ function createHtmlParseTable(data)
         //+ "<tr><td bgcolor='#d3d3d3'>"
         //+ "<tr><td style='background-color: lightgray'>"
         //+ "<tr><td style=3D'border-style:solid;border-color:#A3A3A3;border-width:1pt;background-color:#D8D8D8;vertical-align:top;width:3.8in;padding:2.0pt 3.0pt 2.0pt 3.0pt'>"
+
+        // Syntax Tree (Image): PNG image embedded into an <img> tag as a byte string
+        + "<tr><td>"
+        + "<b>Syntax Tree (Image)</b>"
+        + "</td></tr>"
+        + "<tr><td>"
+        +  html_byteImageTree
+        + "</td></tr>"
+
+        // Syntax Tree (ASCII) Format: Pretty Printed ASCII Art
         + "<tr><td>"
         + "<b>Syntax Tree (ASCII)</b>"
         + "</td></tr>"
         + "<tr><td>"
         +  html_asciiTree
         + "</td></tr>"
+
+        // Bracketed Diagram: otherwise known as "Labelled Bracketing"
         + "<tr bgcolor='#d3d3d3'><td>"
         + "<b>Bracket Diagram</b>"
         + "</td></tr>"
@@ -183,12 +203,15 @@ function createHtmlParseTable(data)
         + bracketDiagram
         // + exampleBracketDiagram
         + "</td></tr>"
+
+        // Parse String: Similary to Bracket Diagram but uses () instead of []
         + "<tr bgcolor='#d3d3d3'><td>"
         + "<b>Parse String</b>"
         + "</td></tr>"
         + "<tr><td>"
         + parseStr
         + "</td></tr>"
+
         + "</table>"
 
     return html

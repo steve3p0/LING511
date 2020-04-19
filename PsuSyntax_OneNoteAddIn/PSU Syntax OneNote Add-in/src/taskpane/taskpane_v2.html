@@ -1,0 +1,138 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
+<!-- This file shows how to design a first-run page that provides a welcome screen to the user about the features of the add-in. -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Task Pane Add-in</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+
+    <!-- For more information on Office UI Fabric, visit https://developer.microsoft.com/fabric. -->
+    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.1/css/fabric.min.css"/>
+
+    <!-- Template styles -->
+    <link href="taskpane.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="ms-font-m ms-welcome ms-Fabric">
+<!--    <header class="ms-welcome__header ms-bgColor-neutralLighter">-->
+<!--        <img width="90" height="90" src="../../assets/viking.png" alt="Portland State University" title="Portland State University" />-->
+<!--        <h2 class="ms-font-xl">Portland State University</h2>-->
+<!--        <span style="font-size:18px">PDX Parser</span>-->
+<!--    </header>-->
+<section id="sideload-msg" class="ms-welcome__main">
+    <h2 class="ms-font-xl">Please sideload your add-in to see app body.</h2>
+</section>
+<main id="app-body" class="ms-welcome__main" style="display: none;">
+
+    <table>
+        <tr>
+            <td>
+                <fieldset>
+                    <legend>Parser Type</legend>
+                    <div id="types">
+                        <input type="radio" name="parser_type" id="pdx" value="pdx" checked>
+                        <label for="pdx">PDX</label><br>
+
+                        <input type="radio" name="parser_type" id="stanford" value="stanford">
+                        <label for="stanford">Stanford</label><br>
+
+                        <br>
+                        <br>
+                    </div>
+                </fieldset>
+            </td>
+
+            <td>
+                <fieldset id="outputFormatFieldset" name="outputFormatFieldset">
+                    <legend>Output Formats</legend>
+                    <div id="outputs">
+                        <input type="checkbox" id="tree_image" name="output" value="tree_image">
+                        <label for="treeImage">Tree (image)</label> <br>
+
+                        <input type="checkbox" id="tree_ascii" name="output" value="tree_ascii" checked>
+                        <label for="treeAscii">Tree (Ascii)</label> <br>
+
+                        <input type="checkbox" id="bracket_diagram" name="output" value="bracket_diagram" checked>
+                        <label for="bracket">Bracketed</label> <br>
+
+                        <input type="checkbox" id="tree_str" name="output" value="tree_str" checked>
+                        <label for="parseStr">Parse String</label> <br>
+                    </div>
+                </fieldset>
+            </td>
+        </tr>
+    </table>
+
+    <br>
+
+    <div><input id="run" class="favorite styled" type="button" value="Parse"></div>
+
+    <br>
+
+    <table border=1>
+        <tr style='background-color:lightgrey'>
+            <td>
+                <!-- <td bgcolor='red'> -->
+                <!-- <td style='background-color:red'> -->
+                Syntax Tree (ASCII):
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+<pre>
+      TP
+  ____|____
+ |         VP
+ |     ____|____
+ NP   |        NP
+ |    |        |
+ N    V        N
+ |    |        |
+boy meets    world
+</pre>
+            </td>
+        </tr>
+
+        <tr style='background-color:lightgrey'>
+            <td>
+                Bracket Diagram:
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                [<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]
+            </td>
+        </tr>
+
+        <tr style='background-color:lightgrey'>
+            <td>
+                Parse String:
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+<pre>
+(TP
+    (NP (N boy))
+    (VP
+        (V meets)
+        (NP (N world))))
+</pre>
+            </td>
+        </tr>
+
+
+</main>
+</body>
+
+</html>
