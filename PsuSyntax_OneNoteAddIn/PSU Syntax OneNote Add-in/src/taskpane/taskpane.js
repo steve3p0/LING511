@@ -132,7 +132,7 @@ function addOutlineToPage(html) {
     });
 }
 
-function createHtmlParseTable(data)
+function createHtmlParseTable1(data)
 {
     const sentence = data["sentence"];
     const parser = data["parser"];
@@ -200,8 +200,8 @@ function createHtmlParseTable(data)
         + "<b>Bracket Diagram</b>"
         + "</td></tr>"
         + "<tr><td>"
-        + bracketDiagram
-        // + exampleBracketDiagram
+        // + bracketDiagram
+        + exampleBracketDiagram
         + "</td></tr>"
 
         // Parse String: Similary to Bracket Diagram but uses () instead of []
@@ -212,7 +212,119 @@ function createHtmlParseTable(data)
         + parseStr
         + "</td></tr>"
 
-        + "</table>"
+        + "</table>";
 
     return html
 }
+
+
+function createHtmlParseTable(data)
+{
+    const sentence = data["sentence"];
+    const parser = data["parser"];
+    const formats = data["response_formats"];
+
+    //const bracketDiagram = formats["bracket_diagram"];
+
+    var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]";
+
+    var bracketDiagram = "[TP [NP [N boy]] [VP [V meets] [NP [N world]]]]";
+
+    //var matchBracket = new RegExp("(?<=\\[)(\\w+)")
+    //var subBracket = bracketDiagram.replace(matchBracket, "<sub>$&</sub>")
+
+    //var bracketDiagram = '<img src="[media id=5]" />';
+    var re = /(?<=\[)(\w+)/gi;
+    var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
+
+    // Create newText by appendening parse tree
+    var html = ""
+        // Bracketed Diagram: otherwise known as "Labelled Bracketing"
+        //+ exampleBracketDiagram;
+        + subBracket;
+
+    return html
+}
+
+// var strg = '{  {  }  {  {  }  }  }', // basic nest
+//     brakRX = /[}|{]/g, // simple match for { or }
+//     nest = [];
+//
+// function walkNest(lvl, found)
+// {
+//     found = found || brakRX.exec(strg);
+//
+//     if (found == '{')
+//     {
+//         lvl = (lvl == undefined) ? 0 : lvl + 1;
+//         nest.push(lvl);
+//         walkNest(lvl);
+//     }
+//     else if (found == '}')
+//     {
+//         return;
+//     }
+//     // '}' base condition met. returning stack
+//
+//     // check next character before returning.
+//     nest.push(lvl);
+//     if (brakRX.exec(strg) == '{')
+//     {
+//         walkNest(lvl-1, '{');
+//     }
+//     return nest;
+//
+// }
+
+
+// function colorNestedBrackets(block)
+// {
+//     // var block = /* code block */
+//     var startIndex = 0; /* index of first bracket */
+//
+//     var currPos = startIndex;
+//     var openBrackets = 0;
+//     var stillSearching = true;
+//     var waitForChar = false;
+//
+//     while (stillSearching && currPos <= block.length) {
+//         var currChar = block.charAt(currPos);
+//
+//         if (!waitForChar) {
+//             switch (currChar) {
+//                 case '{':
+//                     openBrackets++;
+//                     break;
+//                 case '}':
+//                     openBrackets--;
+//                     break;
+//                 case '"':
+//                 case "'":
+//                     waitForChar = currChar;
+//                     break;
+//                 case '/':
+//                     var nextChar = block.charAt(currPos + 1);
+//                     if (nextChar === '/') {
+//                         waitForChar = '\n';
+//                     } else if (nextChar === '*') {
+//                         waitForChar = '*/';
+//                     }
+//             }
+//         } else {
+//             if (currChar === waitForChar) {
+//                 if (waitForChar === '"' || waitForChar === "'") {
+//                     block.charAt(currPos - 1) !== '\\' && (waitForChar = false);
+//                 } else {
+//                     waitForChar = false;
+//                 }
+//             } else if (currChar === '*') {
+//                 block.charAt(currPos + 1) === '/' && (waitForChar = false);
+//             }
+//         }
+//
+//         currPos++
+//         if (openBrackets === 0) { stillSearching = false; }
+//     }
+//
+//     console.log(block.substring(startIndex , currPos)); // contents of the outermost brackets incl. everything inside
+// }
