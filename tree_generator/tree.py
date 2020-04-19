@@ -825,7 +825,8 @@ def parse(sentence, parser, request_formats):
         tree = psu_tree.parse_sentence(sentence)
     elif parser == "stanford":
         stanford_parser = stanford.StanfordParser(model_path=model_path)
-        tree = next(parser.raw_parse(sentence))
+        #tree_parser = Tree(parser=stanford_parser)
+        tree = next(stanford_parser.raw_parse(sentence))
 
     print(tree_str)
 
@@ -842,16 +843,7 @@ def parse(sentence, parser, request_formats):
         import base64
         # encoded_img = base64.encodebytes(img_byte_arr.getvalue()).decode('ascii')
         encoded_img = base64.encodebytes(img_byte_arr).decode('ascii')
-
         response_formats["tree_image"] = encoded_img
-
-        # filename = "tree"
-        # dir_path = os.path.dirname(os.path.realpath(__file__))
-        # full_file_path = dir_path + "\\" + filename + ".png"
-        # psu_tree.write_to_file(tree, "tree")
-        # if os.path.isfile(full_file_path):
-        #     return full_file_path
-        #return tree._repr_png_()
 
     if "tree_ascii" in request_formats:
         print("add tree_ascii to output")
@@ -876,13 +868,6 @@ def parse(sentence, parser, request_formats):
         response_formats["tree_str"] = tree_str
 
     res = {'sentence': sentence, 'parser': parser, 'response_formats': response_formats}
-
-    # parse_dict = {}
-    # parse_dict["sentence"] = sentence
-    # parse_dict["parser"] = parser
-    # parse_dict["output_formats"] = output_formats
-
-    # return parse_dict
 
     return res
 
