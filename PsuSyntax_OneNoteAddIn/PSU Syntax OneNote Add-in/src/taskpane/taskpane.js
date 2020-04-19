@@ -132,7 +132,7 @@ function addOutlineToPage(html) {
     });
 }
 
-function createHtmlParseTable1(data)
+function createHtmlParseTable(data)
 {
     const sentence = data["sentence"];
     const parser = data["parser"];
@@ -162,6 +162,8 @@ function createHtmlParseTable1(data)
     //const nbsp = "&nbsp"
 
     var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]"
+
+    var htmlBracketDiagram = subscriptParseTagsInHtml(bracketDiagram);
 
     // Create newText by appendening parse tree
     var html = ""
@@ -200,8 +202,8 @@ function createHtmlParseTable1(data)
         + "<b>Bracket Diagram</b>"
         + "</td></tr>"
         + "<tr><td>"
-        // + bracketDiagram
-        + exampleBracketDiagram
+        + htmlBracketDiagram
+        // + exampleBracketDiagram
         + "</td></tr>"
 
         // Parse String: Similary to Bracket Diagram but uses () instead of []
@@ -218,7 +220,27 @@ function createHtmlParseTable1(data)
 }
 
 
-function createHtmlParseTable(data)
+function subscriptParseTagsInHtml(bracketDiagram)
+{
+    // var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]";
+    // var bracketDiagram = "[TP [NP [N boy]] [VP [V meets] [NP [N world]]]]";
+
+    var re = /(?<=\[)(\w+)/gi;
+    var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
+
+    //console.log(walkNest()); // returned nest array  [0, 1, 1, 1, 2, 2, 1, 0]
+
+    // Create newText by appendening parse tree
+    var html = ""
+        // Bracketed Diagram: otherwise known as "Labelled Bracketing"
+        //+ exampleBracketDiagram;
+        + subBracket;
+
+    return html
+}
+
+
+function createHtmlParseTable2(data)
 {
     const sentence = data["sentence"];
     const parser = data["parser"];
@@ -237,6 +259,8 @@ function createHtmlParseTable(data)
     var re = /(?<=\[)(\w+)/gi;
     var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
 
+    //console.log(walkNest()); // returned nest array  [0, 1, 1, 1, 2, 2, 1, 0]
+
     // Create newText by appendening parse tree
     var html = ""
         // Bracketed Diagram: otherwise known as "Labelled Bracketing"
@@ -246,10 +270,38 @@ function createHtmlParseTable(data)
     return html
 }
 
-// var strg = '{  {  }  {  {  }  }  }', // basic nest
-//     brakRX = /[}|{]/g, // simple match for { or }
-//     nest = [];
-//
+//var strg = '{  {  }  {  {  }  }  }'; // basic nest
+var strg = '{TP {NP {N boy}} {VP {V meets} {NP {N world}}}}'
+var brakRX = /[}|{]/g; // simple match for { or }
+var nest = [];
+
+function walkNest(lvl, found)
+{
+    found = found || brakRX.exec(strg);
+
+    if (found == '{')
+    {
+        lvl = (lvl == undefined) ? 0 : lvl + 1;
+        nest.push(lvl);
+        walkNest(lvl);
+    }
+    else if (found == '}')
+    {
+        return;
+    }
+    // '}' base condition met. returning stack
+
+    // check next character before returning.
+    nest.push(lvl);
+    if (brakRX.exec(strg) == '{')
+    {
+        walkNest(lvl-1, '{');
+    }
+    return nest;
+
+}
+
+
 // function walkNest(lvl, found)
 // {
 //     found = found || brakRX.exec(strg);
