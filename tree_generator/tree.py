@@ -694,7 +694,7 @@ class Tree(object):
         # print(str(tree))
 
         ###############
-        # self.write_to_file(tree, "XXXXXX")
+        self.write_to_file(tree, "XXXXXX_stanford")
         ###############
 
         # print(f"BEFORE PROMOTE: ********************************")
@@ -724,6 +724,9 @@ class Tree(object):
 
         #print(str(tree))
 
+        # Write PDX Parse Tree to .png file
+        # self.write_to_file(tree, "XXXXXX_pdx")
+
         return tree[0]
 
     def parse_sentences(self, sentences):
@@ -735,6 +738,78 @@ class Tree(object):
             tree_str = self.tree_to_string(tree)
             print(f"{i}. {s}\n{tree_str}\n")
             self.write_to_file(tree, filename)
+
+
+    def __repr__(self):
+        childstr = ", ".join(repr(c) for c in self)
+        return "%s(%s, [%s])" % (
+            type(self).__name__,
+            repr(self._label),
+            childstr,
+        )
+
+    #def _repr_png_(self):
+    def write_tree_stream(self, nltk_tree):
+        """
+        Draws and outputs in PNG for ipython.
+        PNG is used instead of PDF, since it can be displayed in the qt console and
+        has wider browser support.
+        """
+        import os
+        import base64
+        import subprocess
+        import tempfile
+        from nltk.draw.tree import tree_to_treesegment
+        from nltk.draw.util import CanvasFrame
+        from nltk.internals import find_binary
+
+        _canvas_frame = CanvasFrame()
+        # widget = tree_to_treesegment(_canvas_frame.canvas(), self)
+        widget = tree_to_treesegment(_canvas_frame.canvas(), nltk_tree)
+        _canvas_frame.add_widget(widget)
+        x, y, w, h = widget.bbox()
+        # print_to_file uses scrollregion to set the width and height of the pdf.
+        _canvas_frame.canvas()["scrollregion"] = (0, 0, w, h)
+        with tempfile.NamedTemporaryFile() as file:
+            in_path = "{0:}.ps".format(file.name)
+            out_path = "{0:}.png".format(file.name)
+            _canvas_frame.print_to_file(in_path)
+            _canvas_frame.destroy_widget(widget)
+            try:
+                subprocess.call(
+                    [
+                        find_binary(
+                            "gs",
+                            binary_names=["gswin32c.exe", "gswin64c.exe"],
+                            env_vars=["PATH"],
+                            verbose=False,
+                        )
+                    ]
+                    + "-q -dEPSCrop -sDEVICE=png16m -r90 -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dSAFER -dBATCH -dNOPAUSE -sOutputFile={0:} {1:}".format(
+                        out_path, in_path
+                    ).split()
+                )
+            except LookupError:
+                pre_error_message = str(
+                    "The Ghostscript executable isn't found.\n"
+                    "See http://web.mit.edu/ghostscript/www/Install.htm\n"
+                    "If you're using a Mac, you can try installing\n"
+                    "https://docs.brew.sh/Installation then `brew install ghostscript`"
+                )
+                print(pre_error_message, file=sys.stderr)
+                raise LookupError
+
+            with open(out_path, "rb") as sr:
+                res = sr.read()
+                b = bytearray(res)
+                # b0 = b[0]
+            os.remove(in_path)
+            os.remove(out_path)
+            # return base64.b64encode(res).decode()
+            # return base64.b64encode(res)
+
+            # return b0
+            return b
 
 ##################################
 # API Methods
@@ -759,6 +834,17 @@ def parse(sentence, parser, request_formats):
 
     if "tree_image" in request_formats:
         print("do image thingy")
+        # print('getting object from tree.__repr__()')
+        # img = tree.__repr__()
+        psu_tree = Tree()
+        # img = psu_tree.write_tree_stream(tree)
+        img_byte_arr = psu_tree.write_tree_stream(tree)
+        import base64
+        # encoded_img = base64.encodebytes(img_byte_arr.getvalue()).decode('ascii')
+        encoded_img = base64.encodebytes(img_byte_arr).decode('ascii')
+
+        response_formats["tree_image"] = encoded_img
+
         # filename = "tree"
         # dir_path = os.path.dirname(os.path.realpath(__file__))
         # full_file_path = dir_path + "\\" + filename + ".png"
@@ -766,28 +852,28 @@ def parse(sentence, parser, request_formats):
         # if os.path.isfile(full_file_path):
         #     return full_file_path
         #return tree._repr_png_()
-    else:
-        if "tree_ascii" in request_formats:
-            print("add tree_ascii to output")
 
-            from nltk.treeprettyprinter import TreePrettyPrinter
-            ascii_str = str(TreePrettyPrinter(tree)).rstrip()
-            #ascii_str = nltk.Tree.pretty_print(tree)
-            response_formats["tree_ascii"] = ascii_str
+    if "tree_ascii" in request_formats:
+        print("add tree_ascii to output")
 
-        if "bracket_diagram" in request_formats:
-            print("add labelled_bracket to output")
-            bracket_diagram = str(tree)
-            open_b, close_b = "[]"
-            bracket_diagram = bracket_diagram.replace("(", open_b).replace(")", close_b)
-            bracket_diagram = " ".join(bracket_diagram.split())
-            response_formats["bracket_diagram"] = bracket_diagram
+        from nltk.treeprettyprinter import TreePrettyPrinter
+        ascii_str = str(TreePrettyPrinter(tree)).rstrip()
+        #ascii_str = nltk.Tree.pretty_print(tree)
+        response_formats["tree_ascii"] = ascii_str
 
-        if "tree_str" in request_formats:
-            print("add tree_str to output")
-            tree_str = str(tree)
-            tree_str = " ".join(tree_str.split())
-            response_formats["tree_str"] = tree_str
+    if "bracket_diagram" in request_formats:
+        print("add labelled_bracket to output")
+        bracket_diagram = str(tree)
+        open_b, close_b = "[]"
+        bracket_diagram = bracket_diagram.replace("(", open_b).replace(")", close_b)
+        bracket_diagram = " ".join(bracket_diagram.split())
+        response_formats["bracket_diagram"] = bracket_diagram
+
+    if "tree_str" in request_formats:
+        print("add tree_str to output")
+        tree_str = str(tree)
+        tree_str = " ".join(tree_str.split())
+        response_formats["tree_str"] = tree_str
 
     res = {'sentence': sentence, 'parser': parser, 'response_formats': response_formats}
 
