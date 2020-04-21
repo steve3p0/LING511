@@ -80,6 +80,7 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     # Nouns
     'NN': 'N',
     'NNS': 'N',
+    'NNP': 'N',
     'PRP': 'N',
     # Verbs
     'VB': 'V',
@@ -87,6 +88,7 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     'VBD': 'V',
     'VBG': 'V',
     'VBZ': 'V',
+    'VBP': 'V',
     # Adjectives
     'ADJP': 'AdjP',
     'JJ': 'Adj',  # Need to convert JJ to AdjP -> Adj
@@ -120,6 +122,44 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     # '': '',
     # '': '',
 }
+
+# TAG_MAPPING_VERBS: Dict[Union[str, Any], Union[str, Any]] = \
+TAG_MAPPING_VERBS: Dict[str, Dict[str, str]] = \
+    {
+        # Verbs
+        'VB':  {'pos': 'V', 'tense': 'present' },  # base form
+        'VBD': {'pos': 'V', 'tense': 'past'    },  # past tense
+        'VBG': {'pos': 'V', 'tense': 'present' },  # gerund or present participle
+        'VBN': {'pos': 'V', 'tense': 'past'    },  # past participle
+        'VBP': {'pos': 'V', 'tense': 'present' },  # non-3rd person singular present
+        'VBZ': {'pos': 'V', 'tense': 'present' },  # 3rd person singular present
+    }
+
+
+class Verb(object):
+    def __init__(self, label, word):
+        self.label = label
+        self.word = word
+        self.pos_penn = label
+        self.pos_pdx = self.get_verb_pos(self.pos_penn)
+        self.tense = self.get_verb_tense(self.pos_penn)
+
+    def get_verb_properties(self, label):
+        verb_properties = TAG_MAPPING_VERBS[label]
+
+        return verb_properties
+
+    def get_verb_pos(self, label):
+        verb_props = TAG_MAPPING_VERBS[label]
+        verb_pos = verb_props['pos']
+
+        return verb_pos
+
+    def get_verb_tense(self, label):
+        verb_props = TAG_MAPPING_VERBS[label]
+        verb_tense = verb_props['tense']
+
+        return verb_tense
 
 
 class Tree(object):
@@ -384,6 +424,112 @@ class Tree(object):
                 parent.insert(len(parent), only_child)
                 parent = nltk.tree.ParentedTree.convert(parent)
                 return parent
+
+    # VB - Verb, base
+    # form
+    # VBD - Verb, past
+    # tense
+    # VBG - Verb, gerund or present
+    # participle
+    # VBN - Verb, past
+    # participle
+    # VBP - Verb, non - 3
+    # rd
+    # person
+    # singular
+    # present
+    # VBZ - Verb, 3
+    # rd
+    # person
+    # singular
+    # present
+
+    @staticmethod
+    def get_verb_tense(label):
+        verb_properties = TAG_MAPPING_VERBS[label]
+        verb_tense = verb_properties['tense']
+
+        return verb_tense
+
+    # def create_feature(self, pos, label):
+
+    def add_tense1(self, t):
+        # VBN - Verb, past participle
+        # VBP - Verb, non-3rd person singular present
+        # VBZ
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        if t.label() == "VP":
+            current = t
+            parent = current.parent()
+
+            # if the current label is a Verb Phrase (VP)
+            # Get the V child node of the Verb Phrase
+            # It usually is the first child, but if there is an adverb it might be the second
+            for child in current:
+
+                if child.label() in TAG_MAPPING_VERBS:
+                    verb = Verb(child.label(), child[0])
+                    if verb.tense == "past":
+                        tense_node = f"({TENSE_TAG} +[past])"
+                    else:
+                        tense_node = f"({TENSE_TAG} -[past])"
+
+                    # Get current's position in tree
+                    vp_pos = self.get_position(current, parent)
+                    parent.insert(vp_pos, tense_node)
+                    parent = nltk.tree.ParentedTree.convert(parent)
+                    current = nltk.tree.ParentedTree.convert(current)
+
+                    break
+            return
+
+            # parent = current.parent()
+            # tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
+
+        for child in t:
+            self.add_tense(child)
+
+    def add_tense(self, t):
+        # VBN - Verb, past participle
+        # VBP - Verb, non-3rd person singular present
+        # VBZ
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        #if t.label() == "VP":
+        current = t
+        for child in current:
+            if self.terminal(child):
+                next
+            elif child.label() == "VP":
+                for granchild in child:
+                    if granchild.label() in TAG_MAPPING_VERBS:
+                        verb = Verb(granchild.label(), child[0])
+                        if verb.tense == "past":
+                            tense_node = f"({TENSE_TAG} [+past])"
+                        else:
+                            tense_node = f"({TENSE_TAG} [-past])"
+
+                        tense_node = nltk.tree.ParentedTree.fromstring(tense_node)
+                        vp_pos = self.get_position(child, current)
+                        current.insert(vp_pos, tense_node)
+                        current = nltk.tree.ParentedTree.convert(current)
+                        child = nltk.tree.ParentedTree.convert(child)
+
+            # parent = current.parent()
+            # tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
+
+        for child in t:
+            self.add_tense(child)
+
 
     def promote_tense(self, t):
         # VBN - Verb, past participle
@@ -675,14 +821,14 @@ class Tree(object):
         for child in t:
             self.add_complement(child)
 
-    def parse_sentence(self, sentence):
+    def parse_sentence(self, sentence, require_tense=False):
         print(sentence)
 
         tree = next(self.parser.raw_parse(sentence))
 
-        print(f"STANFORD: ********************************")
-        nltk.Tree.pretty_print(tree)
-        print(str(tree))
+        # print(f"STANFORD: ********************************")
+        # nltk.Tree.pretty_print(tree)
+        # print(str(tree))
 
         #tree = self.collapse_duplicate(tree)
         # print(f"COLLAPSE TREE: ********************************")
@@ -701,7 +847,10 @@ class Tree(object):
         # nltk.Tree.pretty_print(tree)
 
         tree = nltk.ParentedTree.convert(tree)
-        self.promote_tense(tree)
+        if (require_tense):
+            self.add_tense(tree)
+        else:
+            self.promote_tense(tree)
 
         tree = self.convert_tree_labels(tree, tag_mapping)
         #print(f"CONVERT: ********************************")
@@ -738,15 +887,6 @@ class Tree(object):
             tree_str = self.tree_to_string(tree)
             print(f"{i}. {s}\n{tree_str}\n")
             self.write_to_file(tree, filename)
-
-
-    def __repr__(self):
-        childstr = ", ".join(repr(c) for c in self)
-        return "%s(%s, [%s])" % (
-            type(self).__name__,
-            repr(self._label),
-            childstr,
-        )
 
     #def _repr_png_(self):
     def write_tree_stream(self, nltk_tree):
