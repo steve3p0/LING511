@@ -451,40 +451,39 @@ class Tree(object):
 
         return verb_tense
 
-    # def create_feature(self, pos, label):
+    @staticmethod
+    def create_feature_node(tag: str, feature: str) -> nltk.tree.ParentedTree:
+        node = f"({tag} {feature})"
+        node = nltk.tree.ParentedTree.fromstring(node)
+        return node
 
     def add_tense(self, t):
-        # VBN - Verb, past participle
-        # VBP - Verb, non-3rd person singular present
-        # VBZ
+
         try:
             t.label()
         except AttributeError:
             # print(t)
             return
 
-        #if t.label() == "VP":
         current = t
         for child in current:
             if self.terminal(child):
                 next
             elif child.label() == "VP":
-                for granchild in child:
-                    if granchild.label() in TAG_MAPPING_VERBS:
-                        verb = Verb(granchild.label(), child[0])
+                for grandchild in child:
+                    if grandchild.label() in TAG_MAPPING_VERBS:
+                        verb = Verb(grandchild.label(), child[0])
                         if verb.tense == "past":
-                            tense_node = f"({TENSE_TAG} [+past])"
+                            feature = "[+past]"
                         else:
-                            tense_node = f"({TENSE_TAG} [-past])"
+                            feature = "[-past]"
 
-                        tense_node = nltk.tree.ParentedTree.fromstring(tense_node)
+                        tense_feature = self.create_feature_node(TENSE_TAG, feature)
+
                         vp_pos = self.get_position(child, current)
-                        current.insert(vp_pos, tense_node)
+                        current.insert(vp_pos, tense_feature)
                         current = nltk.tree.ParentedTree.convert(current)
                         child = nltk.tree.ParentedTree.convert(child)
-
-            # parent = current.parent()
-            # tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
 
         for child in t:
             self.add_tense(child)
