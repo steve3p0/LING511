@@ -453,47 +453,6 @@ class Tree(object):
 
     # def create_feature(self, pos, label):
 
-    def add_tense1(self, t):
-        # VBN - Verb, past participle
-        # VBP - Verb, non-3rd person singular present
-        # VBZ
-        try:
-            t.label()
-        except AttributeError:
-            # print(t)
-            return
-
-        if t.label() == "VP":
-            current = t
-            parent = current.parent()
-
-            # if the current label is a Verb Phrase (VP)
-            # Get the V child node of the Verb Phrase
-            # It usually is the first child, but if there is an adverb it might be the second
-            for child in current:
-
-                if child.label() in TAG_MAPPING_VERBS:
-                    verb = Verb(child.label(), child[0])
-                    if verb.tense == "past":
-                        tense_node = f"({TENSE_TAG} +[past])"
-                    else:
-                        tense_node = f"({TENSE_TAG} -[past])"
-
-                    # Get current's position in tree
-                    vp_pos = self.get_position(current, parent)
-                    parent.insert(vp_pos, tense_node)
-                    parent = nltk.tree.ParentedTree.convert(parent)
-                    current = nltk.tree.ParentedTree.convert(current)
-
-                    break
-            return
-
-            # parent = current.parent()
-            # tense_node = nltk.tree.ParentedTree.fromstring(f"({TENSE_TAG} {t[0]})")
-
-        for child in t:
-            self.add_tense(child)
-
     def add_tense(self, t):
         # VBN - Verb, past participle
         # VBP - Verb, non-3rd person singular present
@@ -529,7 +488,6 @@ class Tree(object):
 
         for child in t:
             self.add_tense(child)
-
 
     def promote_tense(self, t):
         # VBN - Verb, past participle

@@ -19,7 +19,7 @@ from tree import Tree
 model_path = "C:\\workspace_courses\\LING511\\tree_generator\\englishPCFG.ser.gz"
 
 
-def get_expected_actual_trees(sentence, expected_tree_str, testid, require_tense=False, debug=False):
+def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False, require_tense=False):
     stanford_parser = stanford.StanfordParser(model_path=model_path)
 
     tree = Tree(parser=stanford_parser)
@@ -40,16 +40,15 @@ def get_expected_actual_trees(sentence, expected_tree_str, testid, require_tense
         # tree.write_to_file(expected_tree, f"tree_expected_{testid}")
         # tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
-        print(f"{testid}) ACTUAL: ********************************")
-        nltk_tree.pretty_print(actual_tree)
         print(f"{testid}) EXPECTED: ********************************")
         nltk_tree.pretty_print(expected_tree)
-
         print(f"{testid}) ACTUAL: ********************************")
+        nltk_tree.pretty_print(actual_tree)
 
-        print(f"Actual String: \n{actual_tree_str}\n")
         print(f"{testid}) EXPECTED: ********************************")
         print(f"Expected String: \n{str(expected_tree)}\n")
+        print(f"{testid}) ACTUAL: ********************************")
+        print(f"Actual String: \n{actual_tree_str}\n")
 
     return expected_tree, actual_tree
 
@@ -574,6 +573,7 @@ class TestTenTreesADay4(unittest.TestCase):
         self.assertEqual(actual_tree, expected_tree)
 
 
+# 10TAD5 Isn't properly setup yet
 class TestTenTreesADay5(unittest.TestCase):
 
     def test_10TAD4_01(self):
@@ -704,8 +704,9 @@ class TestTenTAD_07(unittest.TestCase):
         expected_parse_str = inspect.cleandoc("""
         (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True)
-        self.assertEqual(actual_tree, expected_tree)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=2, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
 
     def test_10TAD07_03(self):
         sentence = "The river was flowing too fast for him"
