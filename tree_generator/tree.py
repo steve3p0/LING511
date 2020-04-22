@@ -60,7 +60,7 @@ CNF_RIGHT_DELIMITER = '>'
 
 # mapping = {'NP-SBJ': 'NP', 'NP-TMP': 'NP'}
 
-MODAL_TAGS = ["VBD", "MD"]
+MODAL_TAGS = ["VBD", "MD", "TO"]
 VERB_TAGS = ["VB", "VBN", "VBD", "VBG", "VBZ"]
 #MODAL_TAGS = ["V"]
 TENSE_TAG = 'T'
@@ -821,7 +821,8 @@ class Tree(object):
                                 parent = t.parent()
                                 parent = nltk.ParentedTree.convert(parent)
             except:
-                print("swallow hard!")
+                #print("swallow hard!")
+                pass
 
         for child in t:
             self.convert_adv_deg(child)
@@ -855,7 +856,8 @@ class Tree(object):
                     parent = t.parent()
                     parent = nltk.ParentedTree.convert(parent)
         except Exception:
-            print("swallow hard!")
+            #print("swallow hard!")
+            pass
 
         for child in t:
             self.embed_n_np(child)
@@ -880,6 +882,21 @@ class Tree(object):
         new_tree = nltk.tree.Tree.convert(ptree)
         return new_tree
 
+    # def add_tense_phrase(self, t):
+    #
+    #     try:
+    #         t.label()
+    #     except AttributeError:
+    #         # print(t)
+    #         return
+    #
+    #
+    #     self.promote_tense(t)
+    #     self.add_tense(t)
+    #
+    #     for child in t:
+    #         self.add_tense_phrase(child)
+
     ####################
     # Main public functions
     def parse_sentence(self, sentence, require_tense=False):
@@ -897,10 +914,15 @@ class Tree(object):
         self.convert_adv_deg(tree)
         self.embed_n_np(tree)
 
+        ##############################################
+        # Tense Stuff
         if (require_tense):
             self.add_tense(tree)
         else:
             self.promote_tense(tree)
+        #self.add_tense_phrase(tree)
+        # self.promote_tense(tree)
+        # self.add_tense(tree)
 
         self.convert_sbar_cp_that(tree)
 
