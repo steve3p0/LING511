@@ -670,6 +670,7 @@ class TestTenTreesADay5(unittest.TestCase):
 
 class TestTenTAD_07(unittest.TestCase):
 
+    @unittest.skip("Unit Test")
     def test_get_verb_tense(self):
         input_label = "VBD"
         expect_tense = "past"
@@ -677,12 +678,12 @@ class TestTenTAD_07(unittest.TestCase):
 
         self.assertEqual(expect_tense, actual_tense)
 
+    @unittest.skip("Unit Test")
     def test_if_label_is_verb(self):
 
         input_label = "VBD"
         if input_label in tree.TAG_MAPPING_VERBS:
             self.assertTrue(True)
-
 
     def test_10TAD07_01(self):
         sentence = "The mare quickly assessed the situation"
@@ -702,94 +703,173 @@ class TestTenTAD_07(unittest.TestCase):
     def test_10TAD07_02(self):
         sentence = "That the buffalo was in trouble was clear to her"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+           (CP 
+              (C That)
+              (TP
+                 (NP (D the) (N buffalo))
+                 (T [+past])
+                 (VP 
+                    (V was) 
+                    (PP 
+                       (P in) 
+                       (NP (N trouble))
+                    )
+                 )
+              )
+           )
+           (T [+past])
+           (VP (V was) (AdjP (Adj clear) (PP (P to) (NP (N her))))))""")
 
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
-                                                               testid=2, require_tense=True, debug=True)
+                                                               testid=3, require_tense=True, debug=True)
         self.assertEqual(expected_tree, actual_tree)
 
     def test_10TAD07_03(self):
         sentence = "The river was flowing too fast for him"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+            (NP (D The) (N river))
+            (T was)
+            (VP
+              (V flowing)
+              (AdvP (Deg too) (Adv fast))
+              (PP (P for) (NP (N him)))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True, require_tense=False)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_04(self):
         sentence = "Her options were very limited"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+            (NP (D Her) (N options))
+            (T [+past])
+            (VP 
+                (V were) 
+                (AdjP 
+                    (Deg very) 
+                    (Adj limited)
+                )
+            )
+        )""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_05(self):
         sentence = "She saw a large branch on the river bank"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+            (NP (N She))
+            (T [+past])
+            (VP
+                (V saw)
+                (NP (D a) (AdjP (Adj large)) (N branch))
+                (PP 
+                    (P on) 
+                    (NP 
+                        (D the) 
+                        (NP (N river)) 
+                        (N bank)))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_06(self):
         sentence = "She swiftly grabbed the branch with her teeth"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+            (NP (N She))
+            (T [+past])
+            (VP
+                (AdvP (Adv swiftly))
+                (V grabbed)
+                (NP (D the) (N branch))
+                (PP (P with) (NP (D her) (N teeth)))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_07(self):
         sentence = "She tossed the branch into the river"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+            (NP (N She))
+            (T [+past])
+            (VP
+                (V tossed)
+                (NP (D the) (N branch))
+                (PP (P into) (NP (D the) (N river)))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_08(self):
         sentence = "She then yelled for him to swim to it"
         expected_parse_str = inspect.cleandoc("""
-        (TP(NP (D The) (N buffalo))(VP (V longed) (PP (P for) (NP (N adventure)))))""")
+        (TP
+            (NP (N She))
+            (T [+past])
+            (VP
+                (AdvP (Adv then))
+                (V yelled)
+                (CP
+                    (C for)
+                    (TP
+                        (NP (N him))
+                        (T to)
+                        (VP 
+                            (V swim) 
+                            (PP 
+                                (P to) 
+                                (NP (N it))
+                            )
+                        )
+                    )
+                )
+            )
+        )""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_09(self):
+        #sentence = "The buffalo ran to the branch"
         sentence = "The buffalo swam to the branch"
         expected_parse_str = inspect.cleandoc("""
-            (TP 
-                (NP (D The) (N buffalo)) 
-                (T would) 
-                (VP (V have) 
-                    (VP 
-                        (V listened) 
-                        (PP (P to) (NP (N her))) 
-                        (PP (P for) (NP (N hours)))
-                    )
-                )
-            )""")
+        (TP
+            (NP (D The) (N buffalo))
+            (T [+past])
+            (VP (V swam) (PP (P to) (NP (D the) (N branch)))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
     def test_10TAD07_10(self):
         sentence = "He wished that he had opposable thumbs so he could grab the branch"
         expected_parse_str = inspect.cleandoc("""
-            (TP 
-                (NP (D The) (N buffalo)) 
-                (T would) 
-                (VP (V have) 
-                    (VP 
-                        (V listened) 
-                        (PP (P to) (NP (N her))) 
-                        (PP (P for) (NP (N hours)))
-                    )
-                )
-            )""")
+        (TP
+        (NP (N He))
+        (T [+past])
+        (VP
+          (V wished)
+          (CP
+            (C that)
+            (TP
+              (NP (N he))
+              (T [-past])
+              (VP
+                (V had)
+                (NP (AdjP (Adj opposable)) (N thumbs))
+                (CP
+                  (C so)
+                  (TP
+                    (NP (N he))
+                    (T could)
+                    (VP (V grab) (NP (D the) (N branch))))))))))""")
 
-        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
 class Quiz1(unittest.TestCase):

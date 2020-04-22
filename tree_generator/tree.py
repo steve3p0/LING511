@@ -389,6 +389,8 @@ class Tree(object):
     ############################################################################################
     ## New Code
 
+    ###################
+    # Static helper methods
     @staticmethod
     def write_to_file(tree, filename):
         if os.path.exists(f"{filename}.png"):
@@ -425,24 +427,94 @@ class Tree(object):
                 parent = nltk.tree.ParentedTree.convert(parent)
                 return parent
 
-    # VB - Verb, base
-    # form
-    # VBD - Verb, past
-    # tense
-    # VBG - Verb, gerund or present
-    # participle
-    # VBN - Verb, past
-    # participle
-    # VBP - Verb, non - 3
-    # rd
-    # person
-    # singular
-    # present
-    # VBZ - Verb, 3
-    # rd
-    # person
-    # singular
-    # present
+    def traverse_tree_words(self, t):
+        # print("tree:", tree)
+        for subtree in t:
+            if type(subtree) == nltk.tree.Tree:
+                #assert isinstance(subtree, object)
+                self.traverse_tree_words(subtree)
+            else:
+                print(subtree, end=" ")
+
+    def write_tree_stream(self, nltk_tree):
+        """
+        Draws and outputs in PNG for ipython.
+        PNG is used instead of PDF, since it can be displayed in the qt console and
+        has wider browser support.
+        """
+        import os
+        import base64
+        import subprocess
+        import tempfile
+        from nltk.draw.tree import tree_to_treesegment
+        from nltk.draw.util import CanvasFrame
+        from nltk.internals import find_binary
+
+        _canvas_frame = CanvasFrame()
+        # widget = tree_to_treesegment(_canvas_frame.canvas(), self)
+        widget = tree_to_treesegment(_canvas_frame.canvas(), nltk_tree)
+        _canvas_frame.add_widget(widget)
+        x, y, w, h = widget.bbox()
+        # print_to_file uses scrollregion to set the width and height of the pdf.
+        _canvas_frame.canvas()["scrollregion"] = (0, 0, w, h)
+        with tempfile.NamedTemporaryFile() as file:
+            in_path = "{0:}.ps".format(file.name)
+            out_path = "{0:}.png".format(file.name)
+            _canvas_frame.print_to_file(in_path)
+            _canvas_frame.destroy_widget(widget)
+            try:
+                subprocess.call(
+                    [
+                        find_binary(
+                            "gs",
+                            binary_names=["gswin32c.exe", "gswin64c.exe"],
+                            env_vars=["PATH"],
+                            verbose=False,
+                        )
+                    ]
+                    + "-q -dEPSCrop -sDEVICE=png16m -r90 -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dSAFER -dBATCH -dNOPAUSE -sOutputFile={0:} {1:}".format(
+                        out_path, in_path
+                    ).split()
+                )
+            except LookupError:
+                pre_error_message = str(
+                    "The Ghostscript executable isn't found.\n"
+                    "See http://web.mit.edu/ghostscript/www/Install.htm\n"
+                    "If you're using a Mac, you can try installing\n"
+                    "https://docs.brew.sh/Installation then `brew install ghostscript`"
+                )
+                print(pre_error_message, file=sys.stderr)
+                raise LookupError
+
+            with open(out_path, "rb") as sr:
+                res = sr.read()
+                b = bytearray(res)
+                # b0 = b[0]
+            os.remove(in_path)
+            os.remove(out_path)
+            # return base64.b64encode(res).decode()
+            # return base64.b64encode(res)
+
+            # return b0
+            return b
+
+    def next_preterminal(self, subtree, root):
+
+        position = -1
+        i = 0
+        for st in root:
+            if st == subtree:
+                position = i
+                break
+            i += 1
+
+        if position > -1:
+            t = root[position + 1]
+            while True:
+                if type(t[0]) != str:
+                    t = t[0]
+                else:
+                    return t
 
     @staticmethod
     def get_verb_tense(label):
@@ -457,6 +529,20 @@ class Tree(object):
         node = nltk.tree.ParentedTree.fromstring(node)
         return node
 
+    @staticmethod
+    def get_position(subtree: nltk.tree.ParentedTree, root: nltk.tree.ParentedTree) -> int:
+        position = -1
+        i = 0
+        for st in root:
+            if st == subtree:
+                position = i
+                break
+            i += 1
+
+        return position
+
+    #####################################
+    # protected methods
     def add_tense(self, t):
 
         try:
@@ -526,44 +612,6 @@ class Tree(object):
         for child in t:
             self.promote_tense(child)
 
-    def get_position(self, subtree, root):
-        position = -1
-        i = 0
-        for st in root:
-            if st == subtree:
-                position = i
-                break
-            i += 1
-
-        return position
-
-    def next_preterminal(self, subtree, root):
-
-        position = -1
-        i = 0
-        for st in root:
-            if st == subtree:
-                position = i
-                break
-            i += 1
-
-        if position > -1:
-            t = root[position + 1]
-            while True:
-                if type(t[0]) != str:
-                    t = t[0]
-                else:
-                    return t
-
-    def traverse_tree_words(self, t):
-        # print("tree:", tree)
-        for subtree in t:
-            if type(subtree) == nltk.tree.Tree:
-                #assert isinstance(subtree, object)
-                self.traverse_tree_words(subtree)
-            else:
-                print(subtree, end=" ")
-
     def collapse_only_child(self, t, label):
         try:
             t.label()
@@ -612,75 +660,6 @@ class Tree(object):
         for child in t:
             self.collapse_phrases(child, label)
 
-    def collapse_phrases1(self, t, label):
-        try:
-            t.label()
-        except AttributeError:
-            #print(t)
-            return
-
-        if t.label() == label:
-            current = t
-            parent = current.parent()
-            if parent.label() == label and current.right_sibling() is None:
-                current = t
-                parent = current.parent()
-
-                child_count = len(parent)
-
-                # You have to refresh grandparent after parent did a pop
-                grandpa = parent.parent()
-
-                if len(parent) > 2:
-                    for i in (0, len(parent) - 2):
-
-                        # Save left sibling of the current node before we pop it!
-                        # We will make it the left child of the current node
-                        # p_left_child = current.left_sibling()
-                        # p_left_child = nltk.tree.ParentedTree.convert(p_left_child)
-                        oldest = parent[0]
-                        oldest = nltk.tree.ParentedTree.convert(oldest)
-
-                        # We are going to pop the left sibling move it down to the left most
-                        #parent.pop(0)
-                        #parent.pop(i)
-                        parent.remove(oldest)
-                        parent = nltk.tree.ParentedTree.convert(parent)
-
-                        # Now insert the popped off left_child into the left-most child spot of current node
-                        #current.insert(0, p_left_child)
-                        #current.insert(i, oldest)
-                        length = len(current) - 2
-                        current.insert(length, oldest)
-                        current = nltk.tree.ParentedTree.convert(current)
-                else:
-                    # Save left sibling of the current node before we pop it!
-                    # We will make it the left child of the current node
-                    p_left_child = current.left_sibling()
-
-                    # We are going to pop the left sibling move it down to the left most
-                    parent.pop(0)
-
-                    # You have to refresh grandparent after parent did a pop
-                    grandpa = parent.parent()
-
-                    # Now insert the popped off left_child into the left-most child spot of current node
-                    current.insert(0, p_left_child)
-
-                # Now Pop off the right most child of grandpa (which is the current node)
-                grandpa.pop(len(grandpa) - 1)
-
-                # Now promote up the duplicate child (current) to the right most child of the grandparent
-                # You have to covert to do this again to kill current's parents?  Makes no sense!!!
-                current = nltk.tree.ParentedTree.convert(current)
-                grandpa.insert(len(grandpa), current)
-
-                # test t back to current before continuing to traverse.
-                t = current
-
-        for child in t:
-            self.collapse_phrases(child, label)
-
     def expand_phrase_nodes(self, t, preterminal_tags):
         try:
             t.label()
@@ -725,24 +704,6 @@ class Tree(object):
         for child in t:
             self.expand_phrase_nodes(child, preterminal_tags)
 
-    def expand_phrase(self, t):
-        # Search for preterminals with child_label that are not a child of a phrase (phrase_label)
-        # Insert a phrase node above the child
-        preterminal_tags = ["Adv", "Adj"]
-        #preterminal_tags = ["Adj"]
-
-        # Need to convert a ntlk.tree.Tree to a ParentedTree
-        # in order to access parent nodes collapsing
-        ptree = nltk.tree.ParentedTree.convert(t)
-
-        # Collapse ParentedTree ptree (by referece)
-        self.expand_phrase_nodes(ptree, preterminal_tags)
-
-        # Convert ParentedTree ptree back into a nltk.tree.Tree
-        # before returning it
-        new_tree = nltk.tree.Tree.convert(ptree)
-        return new_tree
-
     def add_complement(self, t):
         try:
             t.label()
@@ -778,37 +739,138 @@ class Tree(object):
         for child in t:
             self.add_complement(child)
 
+    def convert_sbar_cp_that(self, t):
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        current = t
+        for child in current:  # Current is NP
+            if self.terminal(child):
+                next
+            elif child.label() == "SBAR":
+                # collapse SBAR and S
+                # Detach NP children
+                # get 'that' from NP parent
+                if child.left_sibling().label() != "NP":
+                    return
+                left_sibling_terminals = child.left_sibling().leaves()
+                if left_sibling_terminals == ['That']:
+                    # create that complement clause
+                    c = nltk.ParentedTree.fromstring("(C That)")
+                    cp = child
+                    cp = nltk.ParentedTree.convert(cp)
+
+                    # Now remove current
+                    root = current.parent()
+                    current_pos = self.get_position(current, root)
+                    root.remove(current)
+                    root.insert(current_pos, cp)
+                    cp.insert(0, c)
+
+                    root = nltk.ParentedTree.convert(root)
+
+        for child in t:
+            self.convert_sbar_cp_that(child)
+
+    # Make sure that the left child of a CP is a C
+    def enforce_cpc(self, t: nltk.Tree):
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        if t.label() == "CP":
+            t[0].set_label("C")
+
+        for child in t:
+            self.enforce_cpc(child)
+
+    # Make sure that the left child of a CP is a C
+    def convert_adv_deg(self, t: nltk.Tree):
+
+        # RB - Adverb
+        # RBR - Adverb, comparative
+        # RBS - Adverb, superlative
+
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        if t.label() in ["ADJP", "ADVP"]:
+            advp = t
+
+            try:
+                if advp[0].label() == "RB" and \
+                   advp[1].label() in ["RB", "JJ"]:
+                    #t = nltk.ParentedTree.convert(t)
+                    adv = advp[0]
+                    if adv[0] in ["too", "very"]:
+                        if len(t) > 1:
+                            if adv.right_sibling().label() in ["RB", "JJ"]:
+                                deg = nltk.ParentedTree("Deg", [adv[0]])
+                                t.remove(t[0])
+                                t.insert(0, deg)
+
+                                t = nltk.ParentedTree.convert(t)
+                                parent = t.parent()
+                                parent = nltk.ParentedTree.convert(parent)
+            except:
+                print("swallow hard!")
+
+        for child in t:
+            self.convert_adv_deg(child)
+
+    ####################
+    # Callers: They call recursive functions
+    def expand_phrase(self, t):
+        # Search for preterminals with child_label that are not a child of a phrase (phrase_label)
+        # Insert a phrase node above the child
+        preterminal_tags = ["Adv", "Adj"]
+        #preterminal_tags = ["Adj"]
+
+        # Need to convert a ntlk.tree.Tree to a ParentedTree
+        # in order to access parent nodes collapsing
+        ptree = nltk.tree.ParentedTree.convert(t)
+
+        # Collapse ParentedTree ptree (by referece)
+        self.expand_phrase_nodes(ptree, preterminal_tags)
+
+        # Convert ParentedTree ptree back into a nltk.tree.Tree
+        # before returning it
+        new_tree = nltk.tree.Tree.convert(ptree)
+        return new_tree
+
+    ####################
+    # Main public functions
     def parse_sentence(self, sentence, require_tense=False):
         print(sentence)
 
         tree = next(self.parser.raw_parse(sentence))
 
-        # print(f"STANFORD: ********************************")
-        # nltk.Tree.pretty_print(tree)
-        # print(str(tree))
-
-        #tree = self.collapse_duplicate(tree)
-        # print(f"COLLAPSE TREE: ********************************")
-        # nltk.Tree.pretty_print(tree)
-
-        # tree = self.convert_tree_labels(tree, tag_mapping)
-        # print(f"CONVERT: ********************************")
-        # nltk.Tree.pretty_print(tree)
-        # print(str(tree))
-
+        print(f"STANFORD: ********************************")
+        nltk.Tree.pretty_print(tree)
+        print(str(tree))
+        #self.write_to_file(tree, "XXXXXX_stanford")
         ###############
-        self.write_to_file(tree, "XXXXXX_stanford")
-        ###############
-
-        # print(f"BEFORE PROMOTE: ********************************")
-        # nltk.Tree.pretty_print(tree)
 
         tree = nltk.ParentedTree.convert(tree)
+        self.convert_adv_deg(tree)
+
         if (require_tense):
             self.add_tense(tree)
         else:
             self.promote_tense(tree)
 
+        self.convert_sbar_cp_that(tree)
+
+        ##############################################################################
+        # CONVERSION OF STANFORD TAGS TO SIMPLIFIED SET
         tree = self.convert_tree_labels(tree, tag_mapping)
         #print(f"CONVERT: ********************************")
         #nltk.Tree.pretty_print(tree)
@@ -826,8 +888,9 @@ class Tree(object):
 
         tree = self.expand_phrase(tree)
 
-        self.add_complement(tree)
+        #self.add_complement(tree)
 
+        self.enforce_cpc(tree)
         #print(str(tree))
 
         # Write PDX Parse Tree to .png file
@@ -844,69 +907,6 @@ class Tree(object):
             tree_str = self.tree_to_string(tree)
             print(f"{i}. {s}\n{tree_str}\n")
             self.write_to_file(tree, filename)
-
-    #def _repr_png_(self):
-    def write_tree_stream(self, nltk_tree):
-        """
-        Draws and outputs in PNG for ipython.
-        PNG is used instead of PDF, since it can be displayed in the qt console and
-        has wider browser support.
-        """
-        import os
-        import base64
-        import subprocess
-        import tempfile
-        from nltk.draw.tree import tree_to_treesegment
-        from nltk.draw.util import CanvasFrame
-        from nltk.internals import find_binary
-
-        _canvas_frame = CanvasFrame()
-        # widget = tree_to_treesegment(_canvas_frame.canvas(), self)
-        widget = tree_to_treesegment(_canvas_frame.canvas(), nltk_tree)
-        _canvas_frame.add_widget(widget)
-        x, y, w, h = widget.bbox()
-        # print_to_file uses scrollregion to set the width and height of the pdf.
-        _canvas_frame.canvas()["scrollregion"] = (0, 0, w, h)
-        with tempfile.NamedTemporaryFile() as file:
-            in_path = "{0:}.ps".format(file.name)
-            out_path = "{0:}.png".format(file.name)
-            _canvas_frame.print_to_file(in_path)
-            _canvas_frame.destroy_widget(widget)
-            try:
-                subprocess.call(
-                    [
-                        find_binary(
-                            "gs",
-                            binary_names=["gswin32c.exe", "gswin64c.exe"],
-                            env_vars=["PATH"],
-                            verbose=False,
-                        )
-                    ]
-                    + "-q -dEPSCrop -sDEVICE=png16m -r90 -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dSAFER -dBATCH -dNOPAUSE -sOutputFile={0:} {1:}".format(
-                        out_path, in_path
-                    ).split()
-                )
-            except LookupError:
-                pre_error_message = str(
-                    "The Ghostscript executable isn't found.\n"
-                    "See http://web.mit.edu/ghostscript/www/Install.htm\n"
-                    "If you're using a Mac, you can try installing\n"
-                    "https://docs.brew.sh/Installation then `brew install ghostscript`"
-                )
-                print(pre_error_message, file=sys.stderr)
-                raise LookupError
-
-            with open(out_path, "rb") as sr:
-                res = sr.read()
-                b = bytearray(res)
-                # b0 = b[0]
-            os.remove(in_path)
-            os.remove(out_path)
-            # return base64.b64encode(res).decode()
-            # return base64.b64encode(res)
-
-            # return b0
-            return b
 
 ##################################
 # API Methods
