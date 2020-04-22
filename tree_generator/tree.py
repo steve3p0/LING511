@@ -594,13 +594,14 @@ class Tree(object):
 
             if (next_pt.label() == "RB"):
                 next_pt = self.next_preterminal(next_pt, parent)
-                if (next_pt.label() in VERB_TAGS):
-                    parent.remove(current)
-                    grandpa = parent.parent()
-                    grandpa.insert(len(grandpa) - 1, tense_node)
-                    parent = nltk.tree.ParentedTree.convert(parent)
-                    grandpa = nltk.tree.ParentedTree.convert(grandpa)
-                    parent = self.remove_duplicates(parent, grandpa)
+                if next_pt is not None:
+                    if (next_pt.label() in VERB_TAGS):
+                        parent.remove(current)
+                        grandpa = parent.parent()
+                        grandpa.insert(len(grandpa) - 1, tense_node)
+                        parent = nltk.tree.ParentedTree.convert(parent)
+                        grandpa = nltk.tree.ParentedTree.convert(grandpa)
+                        parent = self.remove_duplicates(parent, grandpa)
             elif (next_pt.label() in VERB_TAGS):
                 parent.remove(current)
                 grandpa = parent.parent()
