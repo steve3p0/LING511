@@ -904,11 +904,11 @@ class Tree(object):
 
         tree = next(self.parser.raw_parse(sentence))
 
-        print(f"STANFORD: ********************************")
-        nltk.Tree.pretty_print(tree)
-        print(str(tree))
-        #self.write_to_file(tree, "XXXXXX_stanford")
-        ###############
+        # print(f"STANFORD: ********************************")
+        # nltk.Tree.pretty_print(tree)
+        # print(str(tree))
+        # #self.write_to_file(tree, "XXXXXX_stanford")
+        # ###############
 
         tree = nltk.ParentedTree.convert(tree)
         self.convert_adv_deg(tree)

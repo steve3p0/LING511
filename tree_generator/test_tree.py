@@ -872,6 +872,7 @@ class TestTenTAD_07(unittest.TestCase):
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
+
 class Quiz1(unittest.TestCase):
 
     def test_gps6_sentence_a(self):
