@@ -803,13 +803,13 @@ class Tree(object):
             return
 
         if t.label() in ["ADJP", "ADVP"]:
-            advp = t
+            phrase = t
 
             try:
-                if advp[0].label() == "RB" and \
-                   advp[1].label() in ["RB", "JJ"]:
+                if phrase[0].label() == "RB" and \
+                   phrase[1].label() in ["RB", "JJ"]:
                     #t = nltk.ParentedTree.convert(t)
-                    adv = advp[0]
+                    adv = phrase[0]
                     if adv[0] in ["too", "very"]:
                         if len(t) > 1:
                             if adv.right_sibling().label() in ["RB", "JJ"]:
@@ -825,6 +825,40 @@ class Tree(object):
 
         for child in t:
             self.convert_adv_deg(child)
+
+    # Make sure that the left child of a CP is a C
+    def embed_n_np(self, t: nltk.Tree):
+
+        # RB - Adverb
+        # RBR - Adverb, comparative
+        # RBS - Adverb, superlative
+
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        try:
+            for child in t:
+                #t = nltk.ParentedTree.convert(t)
+                if child.label() == child.right_sibling().label() == "NN":
+                    # noun = child
+                    noun = nltk.ParentedTree("NN", [child[0]])
+
+                    np = nltk.ParentedTree("NP", [noun])
+                    child_pos = self.get_position(child, t)
+                    t.remove(child)
+                    t.insert(child_pos, np)
+
+                    t = nltk.ParentedTree.convert(t)
+                    parent = t.parent()
+                    parent = nltk.ParentedTree.convert(parent)
+        except Exception:
+            print("swallow hard!")
+
+        for child in t:
+            self.embed_n_np(child)
 
     ####################
     # Callers: They call recursive functions
@@ -861,6 +895,7 @@ class Tree(object):
 
         tree = nltk.ParentedTree.convert(tree)
         self.convert_adv_deg(tree)
+        self.embed_n_np(tree)
 
         if (require_tense):
             self.add_tense(tree)
