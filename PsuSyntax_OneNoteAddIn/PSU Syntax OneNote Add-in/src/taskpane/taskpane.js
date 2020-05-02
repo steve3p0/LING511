@@ -187,14 +187,26 @@ function createHtmlParseTable(data)
 
     if ("tree_ascii" in formats)
     {
-        const asciiTree = formats["tree_ascii"].replace(/\n/g, "<br />");
+        //var asciiTree = formats["tree_ascii"].replace(/\n/g, "<br />");
+        var asciiTree = formats["tree_ascii"];
+
+        //asciiTree = asciiTree.replace(' ', '&nbsp;');
+        asciiTree = asciiTree.replace(/ /g, '\u00a0');
 
         //var html_asciiTree = html_asciiTree_before.replace(/ /g, '\u00a0');
         //const nbsp = "&nbsp"
 
+        // // Build html span for ASCII Tree
+        // var html_asciiTree =
+        //       "<span style='font-family: Courier New'>"
+        //     + "<pre>"
+        //     +  asciiTree
+        //     + "</pre>"
+        //     + "</span>";
+
         // Build html span for ASCII Tree
         var html_asciiTree =
-              "<span style='font-family: Courier New'>"
+            "<span style=\"font-family: 'Courier New'\""
             + "<pre>"
             +  asciiTree
             + "</pre>"
@@ -261,12 +273,7 @@ function subscriptParseTagsInHtml(bracketDiagram)
 
     // Match the Terminals and wrap them in bold tags
     var re_t = /(\w+)(?=\s?\])/gi;
-    //var subBoldBracket = subBracket.replace(re_nt, "<b>$1</b>");
-    //var subBoldBracket = subBracket.replace(re_nt, "<strong>$1</strong>");
     var subBoldBracket = subBracket.replace(re_t, "<span style='white-space:nowrap; font-weight: bold'>$1</span>");
-
-    // //var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
-    // var subBracket = bracketDiagram.replace(re, "<sub>$1</sub> <b>$2</b>");
 
     //console.log(walkNest()); // returned nest array  [0, 1, 1, 1, 2, 2, 1, 0]
 
