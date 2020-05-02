@@ -5,7 +5,7 @@
 
 /* global document, Office */
 
-const HOST = "https://fd6a814d.ngrok.io"
+const HOST = "https://d32bc7cf.ngrok.io"
 
 Office.onReady(info =>
 {
@@ -28,7 +28,7 @@ export async function run()
             var page = context.application.getActivePage();
 
             // Queue a command to set the page title.
-            page.title = "STRING PARSED";
+            //page.title = "STRING PARSED";
 
             Office.context.document.getSelectedDataAsync(Office.CoercionType.Text, function (asyncResult)
             {
@@ -138,37 +138,10 @@ function createHtmlParseTable(data)
     const parser = data["parser"];
     const formats = data["response_formats"];
 
-    const byteImageTree = formats["tree_image"];
-    const asciiTree = formats["tree_ascii"].replace(/\n/g, "<br />");
-    const bracketDiagram = formats["bracket_diagram"];
-    const parseStr = formats["tree_str"];
-
-    // Build html img to hold Byte array image
-    // <img src='name:image-block-name' alt='a cool image' width='500'/>
-    var html_byteImageTree =
-        //"<img src='name:image-block-name' alt='" + sentence + "' width='500'/>"
-        //"<img src='name:image-block-name' alt='" + sentence + "' width='500'/>"
-        "<img src='data:image/jpeg;base64," + byteImageTree + "' alt='" + sentence + "' width='500'/>";
-
-    // Build html span for ASCII Tree
-    var html_asciiTree =
-        "<span style='font-family: Courier New'>"
-        + "<pre>"
-        + asciiTree
-        + "</pre>"
-        + "</span>";
-
-    //var html_asciiTree = html_asciiTree_before.replace(/ /g, '\u00a0');
-    //const nbsp = "&nbsp"
-
-    var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]"
-
-    var htmlBracketDiagram = subscriptParseTagsInHtml(bracketDiagram);
-
     // Create newText by appendening parse tree
     var html = ""
         // CSS Note working?
-        + "<table border=1>"
+        + "<table border=1>";
         //+ "<table border=3D1 cellpadding=3D0 cellspacing=3D0 valign=3Dtop "
         //    + "style=3D'direction:ltr;border-collapse:collapse;border-style:solid;border-color:#A3A3A3;border-width: 1pt' title=3D'' summary=3D''>"
         //+ "<table class='pdx-ling_parseTable'>"
@@ -181,43 +154,97 @@ function createHtmlParseTable(data)
         //+ "<tr><td style='background-color: lightgray'>"
         //+ "<tr><td style=3D'border-style:solid;border-color:#A3A3A3;border-width:1pt;background-color:#D8D8D8;vertical-align:top;width:3.8in;padding:2.0pt 3.0pt 2.0pt 3.0pt'>"
 
-        // Syntax Tree (Image): PNG image embedded into an <img> tag as a byte string
+    // Create a row label for the sentence and a row for the sentence itself
+    html +=
+        "<tr><td>"
+        + "<b>Sentence</b>"
+        + "</td></tr>"
         + "<tr><td>"
+        +  sentence
+        + "</td></tr>";
+
+    if ("tree_image" in formats)
+    {
+        const byteImageTree = formats["tree_image"];
+
+        // Build html img to hold Byte array image
+        // <img src='name:image-block-name' alt='a cool image' width='500'/>
+        var html_byteImageTree =
+            //"<img src='name:image-block-name' alt='" + sentence + "' width='500'/>"
+            //"<img src='name:image-block-name' alt='" + sentence + "' width='500'/>"
+            "<img src='data:image/jpeg;base64," + byteImageTree + "' alt='" + sentence + "' width='500'/>";
+            //"<img src='data:image/jpeg;base64," + byteImageTree + "' alt='" + asciiTree + "' width='500'/>";
+
+        // Syntax Tree (Image): PNG image embedded into an <img> tag as a byte string
+        html +=
+          "<tr><td>"
         + "<b>Syntax Tree (Image)</b>"
         + "</td></tr>"
         + "<tr><td>"
         +  html_byteImageTree
-        + "</td></tr>"
+        + "</td></tr>";
+    }
 
-        // Syntax Tree (ASCII) Format: Pretty Printed ASCII Art
-        + "<tr><td>"
-        + "<b>Syntax Tree (ASCII)</b>"
-        + "</td></tr>"
-        + "<tr><td>"
-        +  html_asciiTree
-        + "</td></tr>"
+    if ("tree_ascii" in formats)
+    {
+        const asciiTree = formats["tree_ascii"].replace(/\n/g, "<br />");
+
+        //var html_asciiTree = html_asciiTree_before.replace(/ /g, '\u00a0');
+        //const nbsp = "&nbsp"
+
+        // Build html span for ASCII Tree
+        var html_asciiTree =
+              "<span style='font-family: Courier New'>"
+            + "<pre>"
+            +  asciiTree
+            + "</pre>"
+            + "</span>";
+
+        // Syntax Tree (Image): PNG image embedded into an <img> tag as a byte string
+        html += "<tr><td>"
+             +  "<b>Syntax Tree (ASCII)</b>"
+             +  "</td></tr>"
+             +  "<tr><td>"
+             +   html_asciiTree
+             +  "</td></tr>";
+    }
+
+    if ("bracket_diagram" in formats)
+    {
+        //var exampleBracketDiagram =
+        // "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]"
+        const bracketDiagram = formats["bracket_diagram"];
+        var htmlBracketDiagram = subscriptParseTagsInHtml(bracketDiagram);
 
         // Bracketed Diagram: otherwise known as "Labelled Bracketing"
-        + "<tr bgcolor='#d3d3d3'><td>"
-        + "<b>Bracket Diagram</b>"
-        + "</td></tr>"
-        + "<tr><td>"
-        + htmlBracketDiagram
-        // + exampleBracketDiagram
-        + "</td></tr>"
+        html += "<tr bgcolor='#d3d3d3'><td>"
+             +  "<b>Bracket Diagram</b>"
+             +  "</td></tr>"
+             +  "<tr><td>"
+             +   htmlBracketDiagram
+             // + exampleBracketDiagram
+             +  "</td></tr>";
+    }
+
+    if ("tree_str" in formats)
+    {
+        const parseStr = formats["tree_str"];
 
         // Parse String: Similary to Bracket Diagram but uses () instead of []
-        + "<tr bgcolor='#d3d3d3'><td>"
-        + "<b>Parse String</b>"
-        + "</td></tr>"
-        + "<tr><td>"
-        + parseStr
-        + "</td></tr>"
+        html += "<tr bgcolor='#d3d3d3'><td>"
+             +  "<b>Parse String</b>"
+             +  "</td></tr>"
+             +  "<tr><td>"
+             +   parseStr
+             +  "</td></tr>";
+    }
 
-        + "</table>";
+    html += "</table>";
 
     return html
 }
+
+
 
 
 function subscriptParseTagsInHtml(bracketDiagram)
@@ -225,8 +252,21 @@ function subscriptParseTagsInHtml(bracketDiagram)
     // var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]";
     // var bracketDiagram = "[TP [NP [N boy]] [VP [V meets] [NP [N world]]]]";
 
-    var re = /(?<=\[)(\w+)/gi;
-    var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
+    // Match only the Non-Terminals
+    //var re = /(?<=\[)(\w+)/gi;
+
+    // Match the Non-Terminals and wrap them in subscript tags
+    var re_nt = /(?<=\[)(\w+)/gi;
+    var subBracket = bracketDiagram.replace(re_nt, "<sub>$1</sub>");
+
+    // Match the Terminals and wrap them in bold tags
+    var re_t = /(\w+)(?=\s?\])/gi;
+    //var subBoldBracket = subBracket.replace(re_nt, "<b>$1</b>");
+    //var subBoldBracket = subBracket.replace(re_nt, "<strong>$1</strong>");
+    var subBoldBracket = subBracket.replace(re_t, "<span style='white-space:nowrap; font-weight: bold'>$1</span>");
+
+    // //var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
+    // var subBracket = bracketDiagram.replace(re, "<sub>$1</sub> <b>$2</b>");
 
     //console.log(walkNest()); // returned nest array  [0, 1, 1, 1, 2, 2, 1, 0]
 
@@ -234,38 +274,7 @@ function subscriptParseTagsInHtml(bracketDiagram)
     var html = ""
         // Bracketed Diagram: otherwise known as "Labelled Bracketing"
         //+ exampleBracketDiagram;
-        + subBracket;
-
-    return html
-}
-
-
-function createHtmlParseTable2(data)
-{
-    const sentence = data["sentence"];
-    const parser = data["parser"];
-    const formats = data["response_formats"];
-
-    //const bracketDiagram = formats["bracket_diagram"];
-
-    var exampleBracketDiagram = "[<sub>TP</sub> [<sub>NP</sub> [<sub>N</sub> boy]] [<sub>VP</sub> [<sub>V</sub> meets] [<sub>NP</sub> [<sub>N</sub> world]]]]";
-
-    var bracketDiagram = "[TP [NP [N boy]] [VP [V meets] [NP [N world]]]]";
-
-    //var matchBracket = new RegExp("(?<=\\[)(\\w+)")
-    //var subBracket = bracketDiagram.replace(matchBracket, "<sub>$&</sub>")
-
-    //var bracketDiagram = '<img src="[media id=5]" />';
-    var re = /(?<=\[)(\w+)/gi;
-    var subBracket = bracketDiagram.replace(re, "<sub>$1</sub>");
-
-    //console.log(walkNest()); // returned nest array  [0, 1, 1, 1, 2, 2, 1, 0]
-
-    // Create newText by appendening parse tree
-    var html = ""
-        // Bracketed Diagram: otherwise known as "Labelled Bracketing"
-        //+ exampleBracketDiagram;
-        + subBracket;
+        + subBoldBracket;
 
     return html
 }
