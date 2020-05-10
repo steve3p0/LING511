@@ -78,10 +78,11 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     'CD': 'D',
     'PRP$': 'D',
     # Nouns
-    'NN': 'N',
-    'NNS': 'N',
-    'NNP': 'N',
-    'PRP': 'N',
+    'NN'   : 'N',
+    'NNS'  : 'N',
+    'NNP'  : 'N',
+    'PRP'  : 'N',
+    'NNPS' : 'N',
     # Verbs
     'VB': 'V',
     'VBN': 'V',
@@ -225,6 +226,14 @@ class Tree(object):
         string += RDEL
         return string
 
+    @staticmethod
+    def pretty_productions(t_prod):
+        rules = ''
+        for (mother, daughters) in t_prod:
+            rules += format('{: <20} -> {}\n'.format(mother, ' '.join(daughters)))
+
+        rules = os.linesep.join([st for st in rules.splitlines() if st])
+        return rules
 
     @classmethod
     def from_string(cls, string):
@@ -977,7 +986,7 @@ def parse(sentence, parser, request_formats):
         # Use the default PSU Parser - but first use stanford and convert to PSU format
         stanford_parser = stanford.StanfordParser(model_path=model_path)
         psu_tree = Tree(parser=stanford_parser)
-        tree = psu_tree.parse_sentence(sentence)
+        tree = psu_tree.parse_sentence(sentence, require_tense=False)
     elif parser == "stanford":
         stanford_parser = stanford.StanfordParser(model_path=model_path)
         #tree_parser = Tree(parser=stanford_parser)

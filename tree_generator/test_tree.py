@@ -29,16 +29,13 @@ def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False, 
     #actual_tree_str = inspect.cleandoc(str(actual_tree)).replace('\n', '').replace('\r', '').replace('  ', ' ')
     actual_tree_str = inspect.cleandoc(str(actual_tree))
 
-    # tree.write_to_file(expected_tree, "tree_expected_XX")
-    # tree.write_to_file(actual_tree, "tree_expected_XX")
-
     if debug:
         print("\n#########################################################################################")
         print(f"Test Sentence {testid}:\n {sentence}:")
 
         # Write output to .png file
-        # tree.write_to_file(expected_tree, f"tree_expected_{testid}")
-        # tree.write_to_file(actual_tree, f"tree_actual_{testid}")
+        tree.write_to_file(expected_tree, f"tree_expected_{testid}")
+        tree.write_to_file(actual_tree, f"tree_actual_{testid}")
 
         print(f"{testid}) EXPECTED: ********************************")
         nltk_tree.pretty_print(expected_tree)
@@ -49,6 +46,9 @@ def get_expected_actual_trees(sentence, expected_tree_str, testid, debug=False, 
         print(f"Expected String: \n{str(expected_tree)}\n")
         print(f"{testid}) ACTUAL: ********************************")
         print(f"Actual String: \n{actual_tree_str}\n")
+
+        tree.write_to_file(expected_tree, "tree_expected_XX")
+        tree.write_to_file(actual_tree, "tree_actual_XX")
 
     return expected_tree, actual_tree
 
@@ -573,7 +573,7 @@ class TestTenTreesADay4(unittest.TestCase):
         self.assertEqual(actual_tree, expected_tree)
 
 
-# 10TAD5 Isn't properly setup yet
+# 10TAD5 Isn't dddddeedasdfasdfasdf setup yet
 class TestTenTAD_05(unittest.TestCase):
 
     def test_10TAD5_01(self):
@@ -1037,187 +1037,830 @@ class TestTenTAD_07(unittest.TestCase):
         expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True, require_tense=True)
         self.assertEqual(actual_tree, expected_tree)
 
+class TestTenTAD_08(unittest.TestCase):
 
-class Quiz1(unittest.TestCase):
-
-    def test_gps6_sentence_a(self):
-        sentence = "The dog should put his squeaky toy on the fuzzy rug "
-        parse_str1 = inspect.cleandoc("""
-        (TP 
-            (NP 
-                (D The) 
-                (AdjP 
-                    (AdvP (Adv very)) 
-                    (Adj stormy)
-                ) 
-                (N weather)
-            ) 
-            (VP 
-                (V has) 
-                (VP 
-                    (V swept)
-                    (NP 
-                        (D the) 
-                        (N lawnchairs)
-                    ) 
+    def test_10TAD10_01(self):
+        sentence = "The buffalo chomped down on the branch with his powerful jaws"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (D The) (N buffalo))
+            (T [+past])
+            (VP
+                (V chomped)
+                (PP 
+                    (P down)
                     (PP 
-                        (P into) 
+                        (P on) 
+                        (NP (D the) (N branch))
+                    )
+                    (PP 
+                        (P with) 
                         (NP 
-                            (D the) 
-                            (N lake)
+                            (D his) 
+                            (AdjP (Adj powerful)) 
+                            (N jaws)
                         )
                     )
                 )
             )
         )""")
 
-        parse_str = inspect.cleandoc("""
-        (TP 
-            (NP 
-                (D The) 
-                (AdjP 
-                    (AdvP (Adv very)) 
-                    (Adj stormy)
-                ) 
-                (N weather)
-            ) 
-            (T has)
-            (VP 
-                (V swept)
-                (NP 
-                    (D the) 
-                    (N lawnchairs)
-                ) 
-                (PP 
-                    (P into) 
-                    (NP 
-                        (D the) 
-                        (N lake)
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=1, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_10TAD10_02(self):
+        sentence = "He whirled with the branch down the river"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+        (NP (N He))
+        (T [+past])
+        (VP
+          (V whirled)
+          (PP (P with) (NP (D the) (N branch)))
+          (PP (P down) (NP (D the) (N river)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=2, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_10TAD10_03(self):
+        sentence = 'They soon became stuck in the bank of the river'
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (N They))
+            (T [+past])
+            (VP
+                (AdvP (Adv soon))
+                (V became)
+                (AdjP
+                    (Adj stuck)
+                    (PP
+                        (P in)
+                        (NP
+                            (D the)
+                            (N bank)
+                            (PP 
+                                (P of)
+                                (NP (D the) (N river))
+                            )
+                        )
                     )
                 )
             )
         )""")
 
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_04(self):
+        sentence = "The old mare cantered over to him"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (D The) (AdjP (Adj old)) (N mare))
+            (T [+past])
+            (VP 
+                (V cantered) 
+                (PP 
+                    (P over)
+                    (PP 
+                        (P to) 
+                        (NP (N him))
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_05(self):
+        sentence = "She dangled her long flowing tail into the water for the buffalo to grab"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (N She))
+            (T [+past])
+            (VP
+                (V dangled)
+                (NP (D her) (AdjP (Adj long)) (AdjP (Adj flowing)) (N tail))
+                (PP
+                    (P into)
+                    (NP (D the) (N water))
+                )
+                (CP
+                    (C for)
+                    (TP
+                        (NP
+                            (D the)
+                            (N buffalo)
+                        )
+                        (T to) 
+                        (VP (V grab))
+                    )
+                )
+            )    
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_06(self):
+        sentence = "He grabbed her tail"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (N He))
+            (T [+past])
+            (VP
+                (V grabbed)
+                (NP (D her) (N tail))
+            )    
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_07(self):
+        sentence = "She pulled the buffalo with great strength"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+        (NP (N She))
+        (T [+past])
+        (VP
+          (V pulled)
+          (NP (D the) (N buffalo))
+          (PP (P with) (NP (AdjP (Adj great)) (N strength)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_08(self):
+        sentence = "The buffalo slowly scrambled up the bank with the mare’s help"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (D The) (N buffalo))
+            (T [+past])
+            (VP
+                (AdvP (Adv slowly))
+                (V scrambled)
+                (PP 
+                    (P up)
+                    (NP (D the) (N bank))
+                )
+                (PP 
+                    (P with) 
+                    (NP 
+                        (NP 
+                            (D the) 
+                            (N mare's)
+                        )
+                        (N help)
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_09(self):
+        # sentence = "The buffalo ran to the branch"
+        sentence = "He flopped exhausted onto the green grass"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (N He))
+            (T [+past])
+            (VP
+                (V flopped)
+                (AdjP (Adj exhausted))
+                (PP 
+                    (P onto) 
+                    (NP 
+                        (D the) 
+                        (AdjP (Adj green))
+                        (N grass)
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_10(self):
+        sentence = "For the buffalo to be saved pleased the old mare"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (CP
+                (C For)
+                (TP
+                    (NP (D the) (N buffalo))
+                    (T to)
+                    (VP (V be) (VP (V saved)))
+                )
+            )
+            (T [+past])
+            (VP
+                (V pleased)
+                (NP 
+                    (D the) (AdjP (Adj old)) (N mare)
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True,
+                                                               require_tense=False)
+        self.assertEqual(actual_tree, expected_tree)
+
+class TestTenTAD_09(unittest.TestCase):
+
+    def test_10TAD_01(self):
+        sentence = "The old mare walked over to the recumbent buffalo"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (D The) (AdjP (Adj old)) (N mare))
+            (T [+past])
+            (VP
+            (V walked)
+                (PP 
+                    (P over)
+                    (PP (P to) (NP (D the) (AdjP (Adj recumbent)) (N buffalo)))
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=1, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_10TAD_02(self):
+        sentence = "I want to know why you were crossing the treacherous river"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+        (NP (N He))
+        (T [+past])
+        (VP
+          (V whirled)
+          (PP (P with) (NP (D the) (N branch)))
+          (PP (P down) (NP (D the) (N river)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=2, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_10TAD_03(self):
+        sentence = 'I am going to see the city'
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (N They))
+            (T [+past])
+            (VP
+                (AdvP (Adv soon))
+                (V became)
+                (AdjP
+                    (Adj stuck)
+                    (PP
+                        (P in)
+                        (NP
+                            (D the)
+                            (N bank)
+                            (PP 
+                                (P of)
+                                (NP (D the) (N river))
+                            )
+                        )
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_04(self):
+        sentence = "A mouse told me that cities are sensational"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (D The) (AdjP (Adj old)) (N mare))
+            (T [+past])
+            (VP 
+                (V cantered) 
+                (PP 
+                    (P over)
+                    (PP 
+                        (P to) 
+                        (NP (N him))
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_05(self):
+        sentence = "You silly young buffalo"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (N She))
+            (T [+past])
+            (VP
+                (V dangled)
+                (NP (D her) (AdjP (Adj long)) (AdjP (Adj flowing)) (N tail))
+                (PP
+                    (P into)
+                    (NP (D the) (N water))
+                )
+                (CP
+                    (C for)
+                    (TP
+                        (NP
+                            (D the)
+                            (N buffalo)
+                        )
+                        (T to) 
+                        (VP (V grab))
+                    )
+                )
+            )    
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_06(self):
+        sentence = "Cities are only for people"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (N He))
+            (T [+past])
+            (VP
+                (V grabbed)
+                (NP (D her) (N tail))
+            )    
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_07(self):
+        sentence = "They are not for buffalos or for horses"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+        (NP (N She))
+        (T [+past])
+        (VP
+          (V pulled)
+          (NP (D the) (N buffalo))
+          (PP (P with) (NP (AdjP (Adj great)) (N strength)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_08(self):
+        sentence = "The young buffalo pondered this new information thoughtfully"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (D The) (N buffalo))
+            (T [+past])
+            (VP
+                (AdvP (Adv slowly))
+                (V scrambled)
+                (PP 
+                    (P up)
+                    (NP (D the) (N bank))
+                )
+                (PP 
+                    (P with) 
+                    (NP 
+                        (NP 
+                            (D the) 
+                            (N mare's)
+                        )
+                        (N help)
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_09(self):
+        sentence = "I want to know why cities are not for buffalos"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (N He))
+            (T [+past])
+            (VP
+                (V flopped)
+                (AdjP (Adj exhausted))
+                (PP 
+                    (P onto) 
+                    (NP 
+                        (D the) 
+                        (AdjP (Adj green))
+                        (N grass)
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True,
+                                                               require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD_10(self):
+        sentence = "Cities do not have enough grass"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (CP
+                (C For)
+                (TP
+                    (NP (D the) (N buffalo))
+                    (T to)
+                    (VP (V be) (VP (V saved)))
+                )
+            )
+            (T [+past])
+            (VP
+                (V pleased)
+                (NP 
+                    (D the) (AdjP (Adj old)) (N mare)
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True,
+                                                               require_tense=False)
+        self.assertEqual(actual_tree, expected_tree)
+
+
+class TestTenTAD_10(unittest.TestCase):
+
+    def test_10TAD10_01(self):
+        sentence = "Places that do not have grass sound very unhealthy"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP
+                (NP (NNPS Places))
+                (CP 
+                    (C that)
+                    (TP
+                        (NP {tree.EMPTY_SET})
+                        (T do)
+                        (VP 
+                            (NegP (Neg not))
+                            (V have)
+                            (NP (N grass))
+                        )
+                    )
+                )
+            )
+            (T [-past])
+            (VP
+                (V sound)
+                (AdjP
+                    (AdvP (Adv very))
+                    (Adj unhealthy)
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=1, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_10TAD10_02(self):
+        sentence = "I wonder why the mouse thought that cities are exciting"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+        (NP (N I))
+        (T [-past])
+        (VP
+          (V wonder)
+          (CP
+            (C why)
+            (TP
+              (NP (D the) (N mouse))
+              (T [+past])
+              (VP
+                (V thought)
+                (CP
+                  (C that)
+                  (TP
+                    (NP (N cities))
+                    (T [-past])
+                    (VP (V are) (AdjP (Adj exciting))))))))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=3, require_tense=True, debug=True)
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_10TAD10_03(self):
+        sentence = 'The mare said "Mice are very different from us"'
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (D The) (N mare))
+            (T [+past])
+            (VP
+                (V said)
+                (CP
+                    (C {tree.EMPTY_SET})
+                    (TP
+                        (NP (N Mice))
+                        (T [-past])
+                        (VP
+                            (V are)
+                            (AdjP 
+                                (Deg very) 
+                                (Adj different) 
+                                (PP (P from) (NP (N us)))
+                            )
+                        )
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 3, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_04(self):
+        sentence = "The bedraggled young buffalo looked dejected"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP 
+                (D The) 
+                (AdjP (Adj bedraggled)) 
+                (AdjP (Adj young)) 
+                (N buffalo)
+            )
+            (T [+past])
+            (VP (V looked) (AdjP (Adj dejected))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 4, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_05(self):
+        sentence = "The old mare took pity upon the inexperienced buffalo"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (D The) (AdjP (Adj old)) (N mare))
+            (T [+past])
+            (VP
+                (V took)
+                (NP 
+                    (N pity)
+                    (PP 
+                        (P upon) 
+                        (NP 
+                            (D the) 
+                            (AdjP (Adj inexperienced)) 
+                            (N buffalo)
+                        )
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 5, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_06(self):
+        sentence = "The eager buffalo reminded her of herself in her younger days"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+        (NP (D The) (AdjP (Adj eager)) (N buffalo))
+        (T [+past])
+        (VP
+            (V reminded)
+            (NP (N her))
+            (PP 
+                (P of) 
+                (NP 
+                    (N herself)
+                    (PP 
+                        (P in) 
+                        (NP 
+                            (D her) 
+                            (AdjP (Adj younger))
+                            (N days)
+                        )
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 6, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_07(self):
+        sentence = "The mare’s thoughts turned to her youthful adventures"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP 
+                (NP 
+                    (D The) 
+                    (N mare's) 
+                ) 
+                (N thoughts)
+            )
+            (T [+past])
+            (VP
+                (V turned)
+                (PP 
+                    (P to) 
+                    (NP 
+                        (D her) 
+                        (AdjP (Adj youthful)) 
+                        (N adventures)
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 7, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_08(self):
+        sentence = "I can recommend an exciting place that is more friendly to buffalo"
+        expected_parse_str = inspect.cleandoc(f"""
+        (TP
+            (NP (N I))
+            (T can)
+            (VP
+                (VP
+                    (V recommend)
+                    (NP
+                        (NP (D an) (AdjP (Adj exciting)) (N place))
+                        (CP
+                            (C that)
+                            (TP
+                                (NP {tree.EMPTY_SET})
+                                (T [-past])
+                                (VP
+                                    (V is)
+                                    (AdjP
+                                        (AdvP (Adv more))
+                                        (Adj friendly)
+                                        (PP (P to) (NP (N buffalo)))
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 8, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_09(self):
+        #sentence = "The buffalo ran to the branch"
+        sentence = "For you to have an adventure does not require a city"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+            (NP (D The) (N buffalo))
+            (T [+past])
+            (VP (V swam) (PP (P to) (NP (D the) (N branch)))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 9, True, require_tense=True)
+        self.assertEqual(actual_tree, expected_tree)
+
+    def test_10TAD10_10(self):
+        sentence = "I would suggest the bluffs high above the river"
+        expected_parse_str = inspect.cleandoc("""
+        (TP
+        (NP (N I))
+        (T would)
+        (VP
+          (V suggest)
+          (TP
+            (NP (D the) (N bluffs))
+            (AdjP (Adj high) (PP (P above) (NP (D the) (N river)))))))""")
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str, 10, True, require_tense=False)
+        self.assertEqual(actual_tree, expected_tree)
+
+
+
+class Quiz1(unittest.TestCase):
+
+    def test_gps6_sentence_a(self):
+        sentence = "The dog should put his squeaky toy on the fuzzy rug "
+        parse_str = inspect.cleandoc("""
+        (TP (NP (D The) (N dog)) (T should) (VP (V put) (NP (D his) (AdjP (Adj squeaky)) (N toy)) (PP (P on) (NP (D the) (AdjP (Adj fuzzy)) (N rug)))))""")
+
         tree = nltk_tree.fromstring(parse_str)
+
         print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
         stanford_parser = stanford.StanfordParser(model_path=model_path)
         pdx_parser = Tree(parser=stanford_parser)
         pdx_parser.write_to_file(tree, "quiz1_gps6_sa")
 
     def test_gps6_sentence_b(self):
         sentence = "The dog should put his squeaky toy on the fuzzy rug "
-        parse_str1 = inspect.cleandoc("""
-        (TP 
-            (NP 
-                (D The) 
-                (AdjP 
-                    (AdvP (Adv very)) 
-                    (Adj stormy)
-                ) 
-                (N weather)
-            ) 
-            (VP 
-                (V has) 
-                (VP 
-                    (V swept)
-                    (NP 
-                        (D the) 
-                        (N lawnchairs)
-                    ) 
-                    (PP 
-                        (P into) 
-                        (NP 
-                            (D the) 
-                            (N lake)
-                        )
-                    )
-                )
-            )
-        )""")
-
         parse_str = inspect.cleandoc("""
-        (TP 
-            (NP 
-                (D The) 
-                (AdjP 
-                    (AdvP (Adv very)) 
-                    (Adj stormy)
-                ) 
-                (N weather)
-            ) 
-            (T has)
-            (VP 
-                (V swept)
-                (NP 
-                    (D the) 
-                    (N lawnchairs)
-                ) 
-                (PP 
-                    (P into) 
-                    (NP 
-                        (D the) 
-                        (N lake)
-                    )
-                )
-            )
-        )""")
+        (TP
+          (NP (D The) (AdjP (AdvP (Adv very)) (Adj stormy)) (N weather))
+          (T has)
+          (VP
+            (V swept)
+            (NP (D the) (N lawnchairs))
+            (PP (P into) (NP (D the) (N lake)))))""")
 
         tree = nltk_tree.fromstring(parse_str)
+
         print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
         stanford_parser = stanford.StanfordParser(model_path=model_path)
         pdx_parser = Tree(parser=stanford_parser)
         pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
 
     def test_gps6_sentence_c(self):
-        sentence = "The dog should put his squeaky toy on the fuzzy rug "
-        parse_str1 = inspect.cleandoc("""
-        (TP 
-            (NP 
-                (D The) 
-                (AdjP 
-                    (AdvP (Adv very)) 
-                    (Adj stormy)
-                ) 
-                (N weather)
-            ) 
-            (VP 
-                (V has) 
-                (VP 
-                    (V swept)
-                    (NP 
-                        (D the) 
-                        (N lawnchairs)
-                    ) 
-                    (PP 
-                        (P into) 
-                        (NP 
-                            (D the) 
-                            (N lake)
-                        )
-                    )
-                )
-            )
-        )""")
+        sentence = "Scholars wonder if the library might contain the rare books"
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (N Scholars))
+          (VP
+            (V wonder)
+            (CP
+              (C if)
+              (TP
+                (NP (D the) (N library))
+                (T might)
+                (VP (V contain) (NP (D the) (AdjP (Adj rare)) (N books)))))))""")
 
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+
+    #def test_gps6_rules_a(self):
+
+    def test_quiz1_constit_sentence_a(self):
+        sentence = "Jouri wrote a book in her spare time"
         parse_str = inspect.cleandoc("""
         (TP 
-            (NP (N Scholars)) 
-            (VP 
-                (V wonder) 
-                (CP 
-                    (C if) 
-                    (TP 
-                        (NP (D the) (N library)) 
-                        (T might) 
-                        (VP 
-                            (V contain) 
-                            (NP (D the) (AdjP (Adj rare)) (N books)))))))""")
+           (NP (N Jouri))
+           (T [+past])
+           (VP 
+              (V wrote) 
+              (NP (D a) (N book)) 
+              (PP 
+                 (P in) 
+                 (NP 
+                    (D her) 
+                    (AdjP (Adj spare)) 
+                    (N time))))) """)
 
         tree = nltk_tree.fromstring(parse_str)
         print(tree)
         stanford_parser = stanford.StanfordParser(model_path=model_path)
         pdx_parser = Tree(parser=stanford_parser)
-        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_a")
 
     def test_quiz1_constit_sentence_b(self):
         sentence = "The car in the tunnel stalled during rush hour"
@@ -1268,38 +1911,10 @@ class Quiz1(unittest.TestCase):
 
     def test_quiz1_constit_sentence_c(self):
         sentence = "The neighbor yelled at the kids for no good reason"
-        parse_str1 = inspect.cleandoc("""
-        (TP 
-            (NP 
-                (D The) 
-                (AdjP 
-                    (AdvP (Adv very)) 
-                    (Adj stormy)
-                ) 
-                (N weather)
-            ) 
-            (VP 
-                (V has) 
-                (VP 
-                    (V swept)
-                    (NP 
-                        (D the) 
-                        (N lawnchairs)
-                    ) 
-                    (PP 
-                        (P into) 
-                        (NP 
-                            (D the) 
-                            (N lake)
-                        )
-                    )
-                )
-            )
-        )""")
-
         parse_str = inspect.cleandoc("""
         (TP 
             (NP (D The) (N neighbor)) 
+            (T [+past])
             (VP 
                 (V yelled) 
                 (PP (P at) (NP (D the) (N kids))) 
@@ -1309,8 +1924,7 @@ class Quiz1(unittest.TestCase):
         print(tree)
         stanford_parser = stanford.StanfordParser(model_path=model_path)
         pdx_parser = Tree(parser=stanford_parser)
-        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_b")
-
+        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_c")
 
     def test_quiz1_constit_sentence_d(self):
         sentence = "The book on the shelf contains many illustrations in color"
@@ -1361,5 +1975,1041 @@ class Quiz1(unittest.TestCase):
         pdx_parser = Tree(parser=stanford_parser)
         pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_b")
 
+    # Ambiguity:
+    def test_amb_sentence_A1_2(self):
+        sentence = "They should get on top of a TV and discuss violence"
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (D There)) 
+            (T should) 
+            (VP 
+                (V be) 
+                (NP (NP (D a) (NP (N TV)) (N show)))
+                (CP 
+                    (C that) 
+                    (TP 
+                        (NP (N Ø))
+                        (VP (V discusses) (NP (N violence)))
+                    )
+                )
+            )
+        )
+        """)
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "amb_sentence_A1_2")
+
+    # Ambiguity:
+    def test_amb_sentence_A1_3(self):
+        sentence = "They should get on top of a TV and discuss violence"
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (N They)) 
+            (T should) 
+            (VP
+                (VP 
+                    (VB get) 
+                    (PP 
+                        (P on) 
+                        (NP 
+                            (NP (N top)) 
+                            (PP 
+                                (P of) 
+                                (NP (D a) (N TV))
+                            )
+                        )
+                    )
+                ) 
+                (Conj and) 
+                (VP (VB discuss) (NP (N violence)))
+            )
+        ) """)
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "amb_sentence_A1_3")
+
+    def test_gps6_sentence_b(self):
+        sentence = "The dog should put his squeaky toy on the fuzzy rug "
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (D The) (AdjP (AdvP (Adv very)) (Adj stormy)) (N weather))
+          (T has)
+          (VP
+            (V swept)
+            (NP (D the) (N lawnchairs))
+            (PP (P into) (NP (D the) (N lake)))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+
+    def test_gps6_sentence_c(self):
+        sentence = "Scholars wonder if the library might contain the rare books"
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (N Scholars))
+          (VP
+            (V wonder)
+            (CP
+              (C if)
+              (TP
+                (NP (D the) (N library))
+                (T might)
+                (VP (V contain) (NP (D the) (AdjP (Adj rare)) (N books)))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+
+class Quiz2(unittest.TestCase):
+
+    def test_p1_sentence_a_pre(self):
+
+        sentence = "The hungry students from Boston craved chowder with clams"
+
+        print(f"STANFORD: ********************************")
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        stn_tree = next(stanford_parser.raw_parse(sentence))
+
+        nltk_tree.pretty_print(stn_tree)
+        print(stn_tree)
+        rules = stn_tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(stn_tree, "quiz2_P1_sa_stanford")
+
+        print(f"\nPDX: ********************************")
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_tree = pdx_parser.parse_sentence(sentence, require_tense=True)
+
+        nltk_tree.pretty_print(pdx_tree)
+        print(pdx_tree)
+        rules = stn_tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        pdx_parser.write_to_file(tree, "quiz2_P1_sa_pdx_pre")
+
+    def test_p1_sentence_a(self):
+
+        sentence = "The hungry students from Boston craved chowder with clams"
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP 
+                (NP 
+                    (D The)
+                    (AdjP (Adj hungry)) 
+                    (N students)
+                ) 
+                (PP
+                    (P from) 
+                    (NP (N Boston))
+                )
+            )
+            (T [+past])
+            (VP 
+                (V craved)
+                (NP (N chowder)) 
+                (PP (P with) (NP (N clams)))
+            )
+        )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_P1_sa_pdx_post")
+
+    def test_p1_sentence_a_para1(self):
+
+        sentence = "The hungry students from Boston craved chowder with clams"
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP 
+                (NP 
+                    (D The)
+                    (AdjP (Adj hungry)) 
+                    (N students)
+                ) 
+                (PP
+                    (P from) 
+                    (NP (N Boston))
+                )
+            )
+            (T [+past])
+            (VP 
+                (V craved)
+                (NP 
+                    (N chowder)
+                    (PP (P with) (NP (N clams)))    
+                ) 
+            )
+        )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_P1_sentenceA_para1")
+    def test_p1_paraphrase_a1(self):
+
+        sentence = "The hungry students from Boston craved clam chowder"
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP 
+                (NP 
+                    (D The)
+                    (AdjP (Adj hungry)) 
+                    (N students)
+                ) 
+                (PP
+                    (P from) 
+                    (NP (N Boston))
+                )
+            )
+            (T [+past])
+            (VP 
+                (V craved)
+                (NP (NP (N clam)) (N chowder))
+            )
+        )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "test_p1_paraphrase_a1")
+
+    def test_p1_paraphrase_b2(self):
+
+        sentence = "The happy leprechaun danced in Kilkenny and kicked a pot of gold that landed in Tipperary "
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (D The) (AdjP (Adj happy)) (N leprechaun))
+            (T [+past])
+            (VP 
+                (VP (V danced) (PP (P in) (NP (N Kilkenny)))) 
+                (Conj and) 
+                (VP 
+                    (V kicked) 
+                    (NP 
+                        (NP (D a) (N pot)) (PP (P of) (NP (N gold))) 
+                        (CP 
+                            (C that) 
+                            (TP 
+                                (C ∅)
+                                (T [+past])
+                                (VP 
+                                    (V landed) 
+                                    (PP (P in) (NP (N Tipperary))))))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p1_paraphrase_b1")
+
+
+    def test_p1_paraphrase_b2(self):
+
+        sentence = "The happy leprechaun danced in Kilkenny and kicked a pot of gold that landed in Tipperary "
+
+        parse_str = inspect.cleandoc("""
+        (TP  
+            (NP (D The) (AdjP (Adj happy)) (N leprechaun)) 
+            (T [+past])
+            (VP 
+                (V kicked) 
+                (NP (NP (D the) (N pot)) (PP (P of) (NP (N gold)))) 
+                (PP (P from) (NP (N Kilkenny))) 
+                (PP (P to) (NP (N Tipperary)))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p1_paraphrase_b1")
+
+
+
+    def test_p1_paraphrase_c1(self):
+
+        sentence = "Jaya said with gusto that Thando sang the aria"
+
+        parse_str = inspect.cleandoc("""
+        (TP (NP (N Jaya)) (T [+past])(VP (V said) (PP (P with) (NP (N gusto))) (CP (C that) (TP (NP (N Thando)) (T [+past]) (VP (V sang) (NP (D the) (N aria)))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p1_paraphrase_c1")
+
+    def test_p1_sentence_c(self):
+
+        sentence = "Jamal said that Jazmyn sang the aria from La Bohème"
+
+        parse_str = inspect.cleandoc("""
+        (TP (NP (N Jamal)) (T [+past]) (VP (V said) (CP (C that) (TP (NP (N Jazmyn)) (T [+past]) (VP (V sang) (NP (D the) (N aria)) (PP (P from) (NP (N La Bohème))))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p1_sentence_d")
+
+    def test_p2_sentence_old(self):
+
+        sentence = "Hermione thought that Ron had seen the glowing patronus through the thick fog"
+
+        parse_str = inspect.cleandoc("""
+        (TP1 
+            (NP1 (N1 Hermione)) 
+            (T1 [+past])
+            (VP1 
+                (V1 thought) 
+                (CP 
+                    (C that) 
+                    (TP2 
+                        (NP2 (N2 Ron)) 
+                        (T had) 
+                        (VP2 
+                            (V2 seen) 
+                            (NP3 (D3 the) (AdjP1 (Adj1 glowing)) (N3 patronus)) 
+                            (PP (P through) (NP3 (D3 the) (AdjP2 (Adj2 thick)) (N3 fog))))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p2_sentence_corrected")
+
+    def test_p2_sentence_corrected(self):
+
+        sentence = "Hermione thought that Ron had seen the glowing patronus through the thick fog"
+
+        parse_str = inspect.cleandoc("""
+        (TP1 
+            (NP1 (N1 Hermione)) 
+            (T1 [+past])
+            (VP1 
+                (V1 thought) 
+                (CP 
+                    (C that) 
+                    (TP2 
+                        (NP2 (N2 Ron)) 
+                        (T had) 
+                        (VP2 
+                            (V2 seen) 
+                            (NP3 (D3 the) (AdjP1 (Adj1 glowing)) (N3 patronus)) 
+                            (PP (P through) (NP4 (D4 the) (AdjP2 (Adj2 thick)) (N4 fog))))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p2_sentence_corrected")
+
+    def test_p3_tree(self):
+
+        parse_str = inspect.cleandoc("""
+        (R 
+            (C (B)) 
+            (D
+                (F)
+                (E (G) (H))
+            )
+        )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p3_tree")
+
+    def test_p4_sentence_4b(self):
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (VP 
+                (V ’ibat)
+                (PP 
+                    (P xchi’uk)
+                    (NP 
+                        (N smalal)
+                    )
+                )
+            ) 
+            (NP
+                (D li)
+                (N Maruche)
+            )
+        )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p4_sentence_b")
+
+    def test_p4_sentence_4c(self):
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (VP 
+                (V Pas)
+            ) 
+            (NP
+                (D ti)
+                (N ’eklixa’une)
+            )
+        )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p4_sentence_c")
+
+
+    def test_p6_binding_theory(self):
+
+        sentence = "People with disabilities report that they are seeing themselves more in books"
+
+        parse_str = inspect.cleandoc("""
+        (TP (NP (NP (N People)) (PP (P with) (NP (N disabilities)))) (T [-past]) (VP (V report) (CP (C that) (TP (NP (N they)) (T [-past]) (VP (V are) (VP (V seeing) (NP (N themselves)) (AdvP (Adv more)) (PP (P in) (NP (N books)))))))))""")
+
+        # parse_str = inspect.cleandoc("""
+        # (TP
+        #     (NP
+        #         (NP (N People))
+        #         (PP
+        #             (P with)
+        #             (NP (N disabilities))
+        #         )
+        #     )
+        #     (T [-past])
+        #     (VP
+        #         (V report)
+        #         (CP
+        #             (C that)
+        #             (TP
+        #                 (NP (N they))
+        #                 (T [-past])
+        #                 (VP
+        #                     (V are)
+        #                     (VP
+        #                         (V seeing)
+        #                         (NP (N themselves))
+        #                         (AdvP (Adv more))
+        #                         (PP (P in) (NP (N books)))
+        #                     )
+        #                 )
+        #             )
+        #         )
+        #     )
+        # )""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz2_p6_binding_theory")
+
+
+class FunSentences(unittest.TestCase):
+
+    def test_weird_01(self):
+        sentence = "Is it weird how saying sentences backward create backward sentences saying how weird it is"
+        expected_parse_str = inspect.cleandoc(f"""
+          (TP
+            (C {tree.EMPTY_SET})
+            (VP
+              (V Is)
+              (TP
+                (NP (N it))
+                (AdjP (Adj weird))
+                (CP
+                  (C how)
+                  (TP
+                    (TP 
+                      (C {tree.EMPTY_SET})
+                      (VP (V saying) (NP (N sentences)))
+                      (AdvP (Adv backward))
+                    )
+                    (VP
+                      (V create)
+                      (NP
+                        (AdvP (Adv backward))
+                        (N sentences)
+                        (VP
+                          (V saying)
+                          (CP
+                            (C how) 
+                            (TP 
+                              (NP 
+                                (AdjP (Adj weird))
+                                (N it)) 
+                              (VP (V is))
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        """)
+
+        expected_tree, actual_tree = get_expected_actual_trees(sentence, expected_parse_str,
+                                                               testid=1, require_tense=False, debug=True)
+
+
+        self.assertEqual(expected_tree, actual_tree)
+
+    def test_weird_02(self):
+        sentence = "Is it weird how saying sentences backward create backward sentences saying how weird it is"
+        parse_str = inspect.cleandoc("""
+        (TP (NP (D The) (N dog)) (T should) (VP (V put) (NP (D his) (AdjP (Adj squeaky)) (N toy)) (PP (P on) (NP (D the) (AdjP (Adj fuzzy)) (N rug)))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "is_it_weird")
+
+    def test_gps6_sentence_b(self):
+        sentence = "The dog should put his squeaky toy on the fuzzy rug "
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (D The) (AdjP (AdvP (Adv very)) (Adj stormy)) (N weather))
+          (T has)
+          (VP
+            (V swept)
+            (NP (D the) (N lawnchairs))
+            (PP (P into) (NP (D the) (N lake)))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+
+    def test_gps6_sentence_c(self):
+        sentence = "Scholars wonder if the library might contain the rare books"
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (N Scholars))
+          (VP
+            (V wonder)
+            (CP
+              (C if)
+              (TP
+                (NP (D the) (N library))
+                (T might)
+                (VP (V contain) (NP (D the) (AdjP (Adj rare)) (N books)))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+
+    #def test_gps6_rules_a(self):
+
+    def test_quiz1_constit_sentence_a(self):
+        sentence = "Jouri wrote a book in her spare time"
+        parse_str = inspect.cleandoc("""
+        (TP 
+           (NP (N Jouri))
+           (T [+past])
+           (VP 
+              (V wrote) 
+              (NP (D a) (N book)) 
+              (PP 
+                 (P in) 
+                 (NP 
+                    (D her) 
+                    (AdjP (Adj spare)) 
+                    (N time))))) """)
+
+        tree = nltk_tree.fromstring(parse_str)
+        print(tree)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_a")
+
+    def test_quiz1_constit_sentence_b(self):
+        sentence = "The car in the tunnel stalled during rush hour"
+        parse_str1 = inspect.cleandoc("""
+        (TP 
+            (NP 
+                (D The) 
+                (AdjP 
+                    (AdvP (Adv very)) 
+                    (Adj stormy)
+                ) 
+                (N weather)
+            ) 
+            (VP 
+                (V has) 
+                (VP 
+                    (V swept)
+                    (NP 
+                        (D the) 
+                        (N lawnchairs)
+                    ) 
+                    (PP 
+                        (P into) 
+                        (NP 
+                            (D the) 
+                            (N lake)
+                        )
+                    )
+                )
+            )
+        )""")
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (D The) (N car)) 
+            (PP 
+                (P in) 
+                (NP (NP (D the) (N tunnel)) 
+                (VP 
+                    (V stalled) 
+                    (PP (P during) (NP (N rush) (N hour)))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+        print(tree)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_b")
+
+    def test_quiz1_constit_sentence_c(self):
+        sentence = "The neighbor yelled at the kids for no good reason"
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (D The) (N neighbor)) 
+            (T [+past])
+            (VP 
+                (V yelled) 
+                (PP (P at) (NP (D the) (N kids))) 
+                (PP (P for) (NP (D no) (AdjP (Adj good)) (N reason))))) """)
+
+        tree = nltk_tree.fromstring(parse_str)
+        print(tree)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_c")
+
+    def test_quiz1_constit_sentence_d(self):
+        sentence = "The book on the shelf contains many illustrations in color"
+        parse_str1 = inspect.cleandoc("""
+        (TP 
+            (NP 
+                (D The) 
+                (AdjP 
+                    (AdvP (Adv very)) 
+                    (Adj stormy)
+                ) 
+                (N weather)
+            ) 
+            (VP 
+                (V has) 
+                (VP 
+                    (V swept)
+                    (NP 
+                        (D the) 
+                        (N lawnchairs)
+                    ) 
+                    (PP 
+                        (P into) 
+                        (NP 
+                            (D the) 
+                            (N lake)
+                        )
+                    )
+                )
+            )
+        )""")
+
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP 
+                (NP (D The) (N book)) 
+                (PP (P on) (NP (D the) (N shelf)))) 
+            (VP 
+                (V contains) 
+                (NP 
+                    (NP 
+                        (AdjP (Adj many)) (N illustrations)) 
+                    (PP (P in) (NP (N color))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+        print(tree)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_constituency_sentence_b")
+
+    # Ambiguity:
+    def test_amb_sentence_A1_2(self):
+        sentence = "They should get on top of a TV and discuss violence"
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (D There)) 
+            (T should) 
+            (VP 
+                (V be) 
+                (NP (NP (D a) (NP (N TV)) (N show)))
+                (CP 
+                    (C that) 
+                    (TP 
+                        (NP (N Ø))
+                        (VP (V discusses) (NP (N violence)))
+                    )
+                )
+            )
+        )
+        """)
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "amb_sentence_A1_2")
+
+    # Ambiguity:
+    def test_amb_sentence_A1_3(self):
+        sentence = "They should get on top of a TV and discuss violence"
+        parse_str = inspect.cleandoc("""
+        (TP 
+            (NP (N They)) 
+            (T should) 
+            (VP
+                (VP 
+                    (VB get) 
+                    (PP 
+                        (P on) 
+                        (NP 
+                            (NP (N top)) 
+                            (PP 
+                                (P of) 
+                                (NP (D a) (N TV))
+                            )
+                        )
+                    )
+                ) 
+                (Conj and) 
+                (VP (VB discuss) (NP (N violence)))
+            )
+        ) """)
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "amb_sentence_A1_3")
+
+    def test_gps6_sentence_b(self):
+        sentence = "The dog should put his squeaky toy on the fuzzy rug "
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (D The) (AdjP (AdvP (Adv very)) (Adj stormy)) (N weather))
+          (T has)
+          (VP
+            (V swept)
+            (NP (D the) (N lawnchairs))
+            (PP (P into) (NP (D the) (N lake)))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
+
+    def test_gps6_sentence_c(self):
+        sentence = "Scholars wonder if the library might contain the rare books"
+        parse_str = inspect.cleandoc("""
+        (TP
+          (NP (N Scholars))
+          (VP
+            (V wonder)
+            (CP
+              (C if)
+              (TP
+                (NP (D the) (N library))
+                (T might)
+                (VP (V contain) (NP (D the) (AdjP (Adj rare)) (N books)))))))""")
+
+        tree = nltk_tree.fromstring(parse_str)
+
+        print(tree)
+
+        rules = tree.productions()
+
+        rules = list(dict.fromkeys(rules))
+        print("\nRules:")
+        for r in rules:
+            print(r)
+
+        #Tree.pretty_productions(rules)
+        stanford_parser = stanford.StanfordParser(model_path=model_path)
+        pdx_parser = Tree(parser=stanford_parser)
+        pdx_parser.write_to_file(tree, "quiz1_gps6_sb")
 
 
