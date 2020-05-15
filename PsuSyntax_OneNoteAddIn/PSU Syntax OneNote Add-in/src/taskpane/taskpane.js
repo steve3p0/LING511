@@ -5,7 +5,7 @@
 
 /* global document, Office */
 
-const HOST = "https://ca0433fe.ngrok.io"
+const HOST = "https://0a9d79ba.ngrok.io"
 
 Office.onReady(info =>
 {
