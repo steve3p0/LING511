@@ -5,7 +5,7 @@
 
 /* global document, Office */
 
-const HOST = "https://d32bc7cf.ngrok.io"
+const HOST = "https://ca0433fe.ngrok.io"
 
 Office.onReady(info =>
 {
@@ -142,6 +142,7 @@ function createHtmlParseTable(data)
     var html = ""
         // CSS Note working?
         + "<table border=1>";
+        //+ "<table border=1 bgcolor = \"green\">";
         //+ "<table border=3D1 cellpadding=3D0 cellspacing=3D0 valign=3Dtop "
         //    + "style=3D'direction:ltr;border-collapse:collapse;border-style:solid;border-color:#A3A3A3;border-width: 1pt' title=3D'' summary=3D''>"
         //+ "<table class='pdx-ling_parseTable'>"
@@ -155,9 +156,20 @@ function createHtmlParseTable(data)
         //+ "<tr><td style=3D'border-style:solid;border-color:#A3A3A3;border-width:1pt;background-color:#D8D8D8;vertical-align:top;width:3.8in;padding:2.0pt 3.0pt 2.0pt 3.0pt'>"
 
     // Create a row label for the sentence and a row for the sentence itself
-    html +=
-        "<tr><td>"
+    html += ""
+        //+ "<tr><td>"
+        //+ "<tr bgcolor='red'><td>"
+        //+ "<tr style='background-color: red'><td>"
+        //+ "<tr style='background-color:red; '><td>"
+        //+ "<tr style=\"background-color: red\"><td>"
+
+        + "<tr>"
+        + "<td>"
+        //+ "<td style='background-color:#EEEEFF'>"
+
         + "<b>Sentence</b>"
+        //+ "Sentence"
+
         + "</td></tr>"
         + "<tr><td>"
         +  sentence
