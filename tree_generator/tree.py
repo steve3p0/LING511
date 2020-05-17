@@ -84,30 +84,32 @@ tag_mapping: Dict[Union[str, Any], Union[str, Any]] = {
     'PRP'  : 'N',
     'NNPS' : 'N',
     # Verbs
-    'VB': 'V',
-    'VBN': 'V',
-    'VBD': 'V',
-    'VBG': 'V',
-    'VBZ': 'V',
-    'VBP': 'V',
+    'VB'   : 'V',
+    'VBN'  : 'V',
+    'VBD'  : 'V',
+    'VBG'  : 'V',
+    'VBZ'  : 'V',
+    'VBP'  : 'V',
     # Adjectives
-    'ADJP': 'AdjP',
-    'JJ': 'Adj',  # Need to convert JJ to AdjP -> Adj
+    'ADJP' : 'AdjP',
+    'JJ'   : 'Adj',  # Need to convert JJ to AdjP -> Adj
     # Conjuctions
-    'CC': 'Conj',
+    'CC'   : 'Conj',
     # Adverbs
-    'ADVP': 'AdvP',
-    'RB': 'Adv',
-    'RBR': 'Adv',
+    'ADVP' : 'AdvP',
+    'RB'   : 'Adv',
+    'RBR'  : 'Adv',
     # Prepositions
-    'IN': 'P',
-    'TO': 'P',
+    'PRT'  : 'PP',
+    'RP'   : 'P',
+    'IN'   : 'P',
+    'TO'   : 'P',
     #'IN': 'C',  # sometimes IN is C (complement)?
 
     # Modal issues:
     # 1) IF MD IS tense, then it needs to be moved to and a transfer must occur
     #    look at #8 from 10TAD3
-    'MD': 'V',
+    'MD'   : 'V',
 
 
     # 2) JJ : AdjP -> Adj
@@ -785,6 +787,64 @@ class Tree(object):
         for child in t:
             self.convert_sbar_cp_that(child)
 
+    def convert_particle_prep(self, t):
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        current = t
+        for child in current:  # Current is NP
+            if self.terminal(child):
+                next
+            elif child.label() == "PRT":
+
+                right_sibling = child.right_sibling()
+
+                current = nltk.ParentedTree.convert(current)
+                child = nltk.ParentedTree.convert(child)
+
+                new_right = nltk.Tree.convert(right_sibling)
+                current.remove(right_sibling)
+                new_right = nltk.ParentedTree.convert(new_right)
+
+                #current[1].append(new_right)
+                t[1].append(new_right)
+                t.remove(right_sibling)
+                #child.append(new_right)
+                #child = nltk.ParentedTree.convert(child)
+
+                current = nltk.ParentedTree.convert(current)
+                t = nltk.ParentedTree.convert(t)
+                #current = nltk.Tree.convert(current)
+                print(f"blah")
+
+                # current.remove(right_sibling)
+                # # collapse SBAR and S
+                # # Detach NP children
+                # # get 'that' from NP parent
+                # if child.left_sibling().label() != "NP":
+                #     return
+                # left_sibling_terminals = child.left_sibling().leaves()
+                # if left_sibling_terminals == ['That']:
+                #     # create that complement clause
+                #     c = nltk.ParentedTree.fromstring("(C That)")
+                #     cp = child
+                #     cp = nltk.ParentedTree.convert(cp)
+                #
+                #     # Now remove current
+                #     root = current.parent()
+                #     current_pos = self.get_position(current, root)
+                #     root.remove(current)
+                #     root.insert(current_pos, cp)
+                #     cp.insert(0, c)
+                #
+                #     root = nltk.ParentedTree.convert(root)
+
+        for child in t:
+            self.convert_particle_prep(child)
+
     # Make sure that the left child of a CP is a C
     def enforce_cpc(self, t: nltk.Tree):
         try:
@@ -836,6 +896,31 @@ class Tree(object):
 
         for child in t:
             self.convert_adv_deg(child)
+
+    def convert_adv_neg(self, t: nltk.Tree):
+
+        try:
+            t.label()
+        except AttributeError:
+            # print(t)
+            return
+
+        if t.label() in ["AdvP"]:
+            phrase = t
+
+            try:
+                if phrase[0].label() == "Adv" and \
+                   phrase[0][0] == 'not':
+                    #t = nltk.ParentedTree.convert(t)
+                    t.set_label('NegP')
+                    phrase[0].set_label("Neg")
+            except:
+                #print("swallow hard!")
+                pass
+
+        for child in t:
+            self.convert_adv_neg(child)
+
 
     # Make sure that the left child of a CP is a C
     def embed_n_np(self, t: nltk.Tree):
@@ -936,6 +1021,8 @@ class Tree(object):
 
         self.convert_sbar_cp_that(tree)
 
+        self.convert_particle_prep(tree)
+
         ##############################################################################
         # CONVERSION OF STANFORD TAGS TO SIMPLIFIED SET
         tree = self.convert_tree_labels(tree, tag_mapping)
@@ -954,8 +1041,8 @@ class Tree(object):
         # tree = nltk.tree.Tree.convert(tree)
 
         tree = self.expand_phrase(tree)
-
-        #self.add_complement(tree)
+        self.convert_adv_neg(tree)
+        self.add_complement(tree)
 
         self.enforce_cpc(tree)
         #print(str(tree))
