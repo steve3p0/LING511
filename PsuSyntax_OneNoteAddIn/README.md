@@ -10,7 +10,7 @@ You can watch a short demo of it here:
 
 Screen Shot:
 
-![Viking Parser](https://1drv.ms/u/s!An60h608WfNnmc0NN5JR8eW9jzOFcw?e=9SB5WJ)
+![Viking Parser](https://github.com/steve3p0/LING511/blob/master/PsuSyntax_OneNoteAddIn/VikingParserDemo.png?raw=true)
 
 
 
