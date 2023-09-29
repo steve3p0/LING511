@@ -6,8 +6,7 @@ All you need to do is select some text, click 'Parse', and ouila!
 
 You can watch a short demo of it here:
 
-- [Short 3.5 minute video of Viking Parser Plugin](https://github.com/steve3p0/LING511/blob/master/PsuSyntax_OneNoteAddIn/VikingParserDemo.png?raw=true)
-- [Short 3.5 minute video of Viking Parser Plugin](https://onedrive.live.com/embed?resid=67F3593CAD87B47E%21419467&authkey=!AKMj_gAJpzi9TTc)
+- [Short 3.5 minute video of Viking Parser Plugin](https://1drv.ms/v/s!An60h608WfNnmc0LrD1pCz1uUTUh6w)
 
 Screen Shot:
 
